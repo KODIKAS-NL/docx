@@ -16,6 +16,7 @@ import { ChangeAttributes, type IChangedAttributesProperties } from "@file/track
 import { DeletionTrackChange } from "@file/track-revision/track-revision-components/deletion-track-change";
 import { InsertionTrackChange } from "@file/track-revision/track-revision-components/insertion-track-change";
 import {
+    BuilderElement,
     HpsMeasureElement,
     IgnoreIfEmptyXmlComponent,
     NumberValueElement,
@@ -33,6 +34,29 @@ import { type ILanguageOptions, createLanguageComponent } from "./language";
 import { type IFontAttributesProperties, type IThemeFontReference, createRunFonts } from "./run-fonts";
 import { createSubScript, createSuperScript } from "./script";
 import { type UnderlineType, createUnderline } from "./underline";
+
+/**
+ * The kinds of ligatures and alternates Word joins a run's letters into (`w14:ligatures`, Word 2010): the standard ones such as
+ * "fi", contextual alternates, historical and discretional ligatures, a combination of them, all or none.
+ */
+export const LigatureType = {
+    NONE: "none",
+    STANDARD: "standard",
+    CONTEXTUAL: "contextual",
+    HISTORICAL: "historical",
+    DISCRETIONAL: "discretional",
+    STANDARD_CONTEXTUAL: "standardContextual",
+    STANDARD_HISTORICAL: "standardHistorical",
+    CONTEXTUAL_HISTORICAL: "contextualHistorical",
+    STANDARD_DISCRETIONAL: "standardDiscretional",
+    CONTEXTUAL_DISCRETIONAL: "contextualDiscretional",
+    HISTORICAL_DISCRETIONAL: "historicalDiscretional",
+    STANDARD_CONTEXTUAL_HISTORICAL: "standardContextualHistorical",
+    STANDARD_CONTEXTUAL_DISCRETIONAL: "standardContextualDiscretional",
+    STANDARD_HISTORICAL_DISCRETIONAL: "standardHistoricalDiscretional",
+    CONTEXTUAL_HISTORICAL_DISCRETIONAL: "contextualHistoricalDiscretional",
+    ALL: "all",
+} as const;
 
 type IFontOptions = {
     readonly name: string;
@@ -225,6 +249,8 @@ export type IRunStylePropertiesOptions = {
     readonly specVanish?: boolean;
     readonly scale?: number;
     readonly math?: boolean;
+    /** The ligatures Word joins the run's letters into (`w14:ligatures`). Without it, none, unless the run's style has them. */
+    readonly ligatures?: (typeof LigatureType)[keyof typeof LigatureType];
 };
 
 /**
@@ -358,7 +384,8 @@ export class RunProperties extends IgnoreIfEmptyXmlComponent {
             this.push(new NumberValueElement("w:w", options.scale));
         }
 
-        if (options.kern) {
+        // a kern of 0 turns off the kerning a style gives the run
+        if (options.kern !== undefined) {
             this.push(new HpsMeasureElement("w:kern", options.kern));
         }
 
@@ -430,6 +457,15 @@ export class RunProperties extends IgnoreIfEmptyXmlComponent {
 
         if (options.math !== undefined) {
             this.push(new OnOffElement("w:oMath", options.math));
+        }
+
+        if (options.ligatures) {
+            this.push(
+                new BuilderElement<{ readonly val: string }>({
+                    name: "w14:ligatures",
+                    attributes: { val: { key: "w14:val", value: options.ligatures } },
+                }),
+            );
         }
 
         if (options.revision) {

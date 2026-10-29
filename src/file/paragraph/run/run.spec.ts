@@ -8,7 +8,7 @@ import { ShadingType } from "@file/shading";
 
 import { TwoLinesInOneBrackets } from "./east-asian-layout";
 import { EmphasisMarkType } from "./emphasis-mark";
-import { HighlightColor, TextEffect } from "./properties";
+import { HighlightColor, LigatureType, TextEffect } from "./properties";
 import { PageNumber, Run } from "./run";
 import { UnderlineType } from "./underline";
 
@@ -196,6 +196,31 @@ describe("Run", () => {
             const tree = new Formatter().format(run);
             expect(tree).to.deep.equal({
                 "w:r": [{ "w:rPr": [{ "w:dstrike": {} }] }],
+            });
+        });
+    });
+
+    describe("#ligatures", () => {
+        it("should add the ligatures to the properties", () => {
+            const run = new Run({
+                ligatures: LigatureType.STANDARD_CONTEXTUAL,
+            });
+            const tree = new Formatter().format(run);
+            expect(tree).to.deep.equal({
+                "w:r": [{ "w:rPr": [{ "w14:ligatures": { _attr: { "w14:val": "standardContextual" } } }] }],
+            });
+        });
+
+        it("should put the ligatures after the run's other properties", () => {
+            const run = new Run({
+                ligatures: LigatureType.NONE,
+                language: { value: "en-US" },
+            });
+            const tree = new Formatter().format(run);
+            expect(tree).to.deep.equal({
+                "w:r": [
+                    { "w:rPr": [{ "w:lang": { _attr: { "w:val": "en-US" } } }, { "w14:ligatures": { _attr: { "w14:val": "none" } } }] },
+                ],
             });
         });
     });
@@ -886,6 +911,11 @@ describe("Run", () => {
                         },
                     ],
                 });
+            });
+
+            it("should write a kern of 0, which turns off the kerning of the run's style", () => {
+                const tree = new Formatter().format(new Run({ kern: 0 }));
+                expect(tree).to.deep.equal({ "w:r": [{ "w:rPr": [{ "w:kern": { _attr: { "w:val": 0 } } }] }] });
             });
         });
 
