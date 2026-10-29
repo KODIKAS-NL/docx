@@ -1100,6 +1100,21 @@ describe("ImageRun", () => {
             });
         });
 
+        it("should write the effect extent it is given", () => {
+            const currentImageRun = new ImageRun({
+                type: "png",
+                data: Buffer.from(""),
+                transformation: { width: 200, height: 200 },
+                effectExtent: { top: 1, right: 2, bottom: 3, left: 4 },
+            });
+            const tree = new Formatter().format(currentImageRun, {
+                file: { Media: { addImage: vi.fn() } } as unknown as File,
+                viewWrapper: {} as unknown as IViewWrapper,
+                stack: [],
+            });
+            expect(JSON.stringify(tree)).toContain('"wp:effectExtent":{"_attr":{"t":1,"r":2,"b":3,"l":4}}');
+        });
+
         it("should strip base64 marker", () => {
             const spy = vi.spyOn(global, "atob").mockReturnValue("atob result");
 
