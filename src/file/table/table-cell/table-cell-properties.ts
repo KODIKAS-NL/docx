@@ -11,7 +11,7 @@
 import { CellMerge, DeletedTableCell, type ICellMergeAttributes, InsertedTableCell } from "@file/track-revision";
 import { ChangeAttributes, type IChangedAttributesProperties } from "@file/track-revision/track-revision";
 import { type TableVerticalAlign, createVerticalAlign } from "@file/vertical-align";
-import { IgnoreIfEmptyXmlComponent, XmlComponent } from "@file/xml-components";
+import { IgnoreIfEmptyXmlComponent, OnOffElement, XmlComponent } from "@file/xml-components";
 
 import { type IShadingAttributesProperties, createShading } from "../../shading";
 import { type ITableCellMarginOptions, createCellMargin } from "../table-properties/table-cell-margin";
@@ -33,6 +33,8 @@ export type ITableCellPropertiesOptionsBase = {
     readonly margins?: ITableCellMarginOptions;
     /** Vertical alignment of content within the cell */
     readonly verticalAlign?: TableVerticalAlign;
+    /** Ignore the end of cell marker when the row height is calculated (`w:hideMark`) */
+    readonly hideMark?: boolean;
     /** Text direction/flow within the cell */
     readonly textDirection?: (typeof TextDirection)[keyof typeof TextDirection];
     /** Vertical merge setting for the cell */
@@ -186,6 +188,10 @@ export class TableCellProperties extends IgnoreIfEmptyXmlComponent {
 
         if (options.verticalAlign) {
             this.root.push(createVerticalAlign(options.verticalAlign));
+        }
+
+        if (options.hideMark !== undefined) {
+            this.root.push(new OnOffElement("w:hideMark", options.hideMark));
         }
 
         if (options.insertion) {

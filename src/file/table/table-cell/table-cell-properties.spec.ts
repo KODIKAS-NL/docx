@@ -37,6 +37,12 @@ describe("TableCellProperties", () => {
             expect(tree).to.deep.equal({ "w:tcPr": [{ "w:vAlign": { _attr: { "w:val": "bottom" } } }] });
         });
 
+        it("sets hideMark after the vertical alignment", () => {
+            const properties = new TableCellProperties({ verticalAlign: VerticalAlignTable.CENTER, hideMark: true });
+            const tree = new Formatter().format(properties);
+            expect(tree).to.deep.equal({ "w:tcPr": [{ "w:vAlign": { _attr: { "w:val": "center" } } }, { "w:hideMark": {} }] });
+        });
+
         it("should set width", () => {
             const properties = new TableCellProperties({
                 width: {
