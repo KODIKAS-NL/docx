@@ -8,8 +8,11 @@
  *
  * @module
  */
+import type { IMediaData } from "@file/media";
+import { standardizeData } from "@file/paragraph/run/image-data";
 import { COLOR_ATTRIBUTES, ColorAttributeComponent, type ThemeColor } from "@file/theme/theme-color";
-import { XmlAttributeComponent, XmlComponent } from "@file/xml-components";
+import { BuilderElement, type IContext, type IXmlableObject, XmlAttributeComponent, XmlComponent } from "@file/xml-components";
+import { hashedId } from "@util/convenience-functions";
 import { uCharHexNumber } from "@util/values";
 
 /**
@@ -85,6 +88,15 @@ export type IDocumentBackgroundOptions = {
      * @deprecated Give `color` a theme color instead, such as `{ theme: "accent1", lighter: 40 }`
      */
     readonly themeTint?: string;
+    /**
+     * A picture over the background color (Word's Fill Effects, as VML `v:fill`): `"tile"` repeats it at its own size from each
+     * page's top left (Word's Texture), `"frame"` is one picture for the page (Word's Picture)
+     */
+    readonly picture?: {
+        readonly type: "png" | "jpg" | "gif" | "bmp";
+        readonly data: Buffer | string | Uint8Array | ArrayBuffer;
+        readonly fill?: "tile" | "frame";
+    };
 };
 
 /**
@@ -122,7 +134,9 @@ export class DocumentBackground extends XmlComponent {
     /**
      * @throws If a color isn't valid, or `color` is a theme color and `themeColor`, `themeShade` or `themeTint` is given
      */
-    public constructor({ color, themeColor, themeShade, themeTint }: IDocumentBackgroundOptions) {
+    private readonly picture?: IMediaData;
+
+    public constructor({ color, themeColor, themeShade, themeTint, picture }: IDocumentBackgroundOptions) {
         super("w:background");
 
         if (typeof color === "object" && (themeColor !== undefined || themeShade !== undefined || themeTint !== undefined)) {
@@ -137,5 +151,44 @@ export class DocumentBackground extends XmlComponent {
                 { key: "w:themeTint", value: themeTint === undefined ? undefined : uCharHexNumber(themeTint) },
             ]),
         );
+
+        if (picture) {
+            const data = standardizeData(picture.data);
+            this.picture = {
+                type: picture.type,
+                data,
+                fileName: `${hashedId(data)}.${picture.type}`,
+                transformation: { pixels: { x: 0, y: 0 }, emus: { x: 0, y: 0 } },
+            };
+            // Word's own shape id and attributes for a background fill; the picture's relationship is filled in when packed
+            this.root.push(
+                new BuilderElement({
+                    name: "v:background",
+                    attributes: {
+                        id: { key: "id", value: "_x0000_s1025" },
+                        bwmode: { key: "o:bwmode", value: "white" },
+                        targetscreensize: { key: "o:targetscreensize", value: "1024,768" },
+                    },
+                    children: [
+                        new BuilderElement({
+                            name: "v:fill",
+                            attributes: {
+                                id: { key: "r:id", value: `rId{${this.picture.fileName}}` },
+                                title: { key: "o:title", value: "" },
+                                recolor: { key: "recolor", value: "t" },
+                                type: { key: "type", value: picture.fill ?? "tile" },
+                            },
+                        }),
+                    ],
+                }),
+            );
+        }
+    }
+
+    public prepForXml(context: IContext): IXmlableObject | undefined {
+        if (this.picture) {
+            context.file.Media.addImage(this.picture.fileName, this.picture);
+        }
+        return super.prepForXml(context);
     }
 }

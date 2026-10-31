@@ -17,6 +17,7 @@ import { type RegularImageOptions, type SvgMediaOptions, imageTypeOf, standardiz
 import { type IRunPropertiesOptions, RunProperties } from "./properties";
 import { Drawing, type IFloating } from "../../drawing";
 import type { EffectExtentAttributes } from "../../drawing/effect-extent/effect-extent";
+import type { LuminanceOptions } from "../../drawing/inline/graphic/graphic-data/pic/blip/blip";
 import type { ICropOptions } from "../../drawing/inline/graphic/graphic-data/pic/blip/source-rectangle";
 import type { OutlineOptions } from "../../drawing/inline/graphic/graphic-data/pic/shape-properties/outline/outline";
 import type { SolidFillOptions } from "../../drawing/inline/graphic/graphic-data/pic/shape-properties/outline/solid-fill";
@@ -43,6 +44,8 @@ type CoreImageOptions = DrawingLinkOptions & {
     readonly solidFill?: SolidFillOptions;
     /** Crops the image by trimming a percentage (0-100) off each edge before it is stretched to fill the frame. */
     readonly crop?: ICropOptions;
+    /** The picture's brightness and contrast, each from -100 to 100 percent (`a:lum`): Word's Washout is 70 and -70. */
+    readonly luminance?: LuminanceOptions;
     /** Extra room around the image for its effects (a shadow, a glow), in EMUs per side; Word lays the image out with it. */
     readonly effectExtent?: EffectExtentAttributes;
     /** Formatting of the run the image is in, such as `position` to raise or lower it from the text's baseline. */
@@ -145,6 +148,7 @@ export class ImageRun extends XmlComponent {
             outline: options.outline,
             solidFill: options.solidFill,
             crop: options.crop,
+            luminance: options.luminance,
             effectExtent: options.effectExtent,
             link: options.link,
             decorative: options.decorative,
