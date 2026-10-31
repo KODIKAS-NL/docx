@@ -7,7 +7,7 @@
  *
  * @module
  */
-import { Run } from "@file/paragraph";
+import { type IRunOptions, Run } from "@file/paragraph";
 
 import { ContinuationSeperator } from "./continuation-seperator";
 
@@ -21,8 +21,8 @@ import { ContinuationSeperator } from "./continuation-seperator";
  * @internal
  */
 export class ContinuationSeperatorRun extends Run {
-    public constructor() {
-        super({});
+    public constructor(options: IRunOptions = {}) {
+        super(options);
 
         this.root.push(new ContinuationSeperator());
     }

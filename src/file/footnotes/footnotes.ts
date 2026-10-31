@@ -19,6 +19,17 @@ import { SeperatorRun } from "./footnote/run/seperator-run";
 import { FootnotesAttributes } from "./footnotes-attributes";
 
 /**
+ * The separators of a document's footnotes or endnotes, each the paragraphs of a special note: the separator between
+ * the text and the notes, the separator above notes continued from the page before, and the notice under a note that
+ * goes on on the next page. A separator's line is a `SeperatorRun` or `ContinuationSeperatorRun` in its paragraph.
+ */
+export type INoteSeparatorsOptions = {
+    readonly separator?: readonly Paragraph[];
+    readonly continuationSeparator?: readonly Paragraph[];
+    readonly continuationNotice?: readonly Paragraph[];
+};
+
+/**
  * Represents the footnotes collection in a WordprocessingML document.
  *
  * FootNotes manages all footnotes in a document and automatically creates
@@ -66,6 +77,9 @@ export class FootNotes extends XmlComponent {
     // The highest id of the footnotes, so the one after it is free
     // eslint-disable-next-line functional/prefer-readonly-type
     private highestId = 0;
+    // The separator, continuation separator and continuation notice, as they are in the footnotes
+    // eslint-disable-next-line functional/prefer-readonly-type
+    private readonly separators: Footnote[] = [];
 
     public constructor() {
         super("w:footnotes");
@@ -108,6 +122,8 @@ export class FootNotes extends XmlComponent {
         });
 
         this.root.push(begin);
+        // eslint-disable-next-line functional/immutable-data
+        this.separators.push(begin);
 
         const spacing = new Footnote({
             id: 0,
@@ -125,6 +141,36 @@ export class FootNotes extends XmlComponent {
         });
 
         this.root.push(spacing);
+        // eslint-disable-next-line functional/immutable-data
+        this.separators.push(spacing);
+    }
+
+    /**
+     * Replaces the default separators with the given ones (the default ones stay for those not given).
+     *
+     * @param options - The separators' paragraphs
+     */
+    public setSeparators(options: INoteSeparatorsOptions): void {
+        const given = [
+            [FootnoteType.SEPERATOR, -1, options.separator],
+            [FootnoteType.CONTINUATION_SEPERATOR, 0, options.continuationSeparator],
+            [FootnoteType.CONTINUATION_NOTICE, 1, options.continuationNotice],
+        ] as const;
+        for (const [type, id, children] of given) {
+            if (children === undefined) {
+                continue;
+            }
+            const note = new Footnote({ id, type, children });
+            const replaced = this.separators[id + 1];
+            // in place of the default one, or after the separators
+            const at = replaced ? this.root.indexOf(replaced) : this.root.indexOf(this.separators[id]) + 1;
+
+            this.root.splice(at, replaced ? 1 : 0, note);
+            // eslint-disable-next-line functional/immutable-data
+            this.separators[id + 1] = note;
+            // eslint-disable-next-line functional/immutable-data
+            this.highestId = Math.max(this.highestId, id);
+        }
     }
 
     /**
@@ -133,10 +179,11 @@ export class FootNotes extends XmlComponent {
      * @param id - Unique numeric identifier for the footnote
      * @param paragraph - Array of paragraphs that make up the footnote content
      */
-    public createFootNote(id: number, paragraph: readonly Paragraph[]): void {
+    public createFootNote(id: number, paragraph: readonly Paragraph[], ownMark?: boolean): void {
         const footnote = new Footnote({
             id: id,
             children: paragraph,
+            ownMark,
         });
 
         this.root.push(footnote);
@@ -166,7 +213,7 @@ export class FootNotes extends XmlComponent {
             return existing;
         }
         const id = this.highestId + 1;
-        this.createFootNote(id, footnote.children);
+        this.createFootNote(id, footnote.children, footnote.ownMark);
         // eslint-disable-next-line functional/immutable-data
         this.ownNotes.set(reference, id);
         return id;

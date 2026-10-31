@@ -9,3 +9,6 @@
  * @module
  */
 export * from "./reference-run";
+export * from "./footnote-ref-run";
+export * from "./seperator-run";
+export * from "./continuation-seperator-run";

@@ -7,6 +7,7 @@ import { Endnote, EndnoteType } from "./endnote/endnote";
 import { ContinuationSeperatorRun } from "../footnotes/footnote/run/continuation-seperator-run";
 import type { NoteContent } from "../footnotes/footnote/run/reference-run";
 import { SeperatorRun } from "../footnotes/footnote/run/seperator-run";
+import type { INoteSeparatorsOptions } from "../footnotes/footnotes";
 
 export class Endnotes extends XmlComponent {
     // The endnotes that reference runs bring with them, by their runs, with the ids they are given
@@ -14,6 +15,9 @@ export class Endnotes extends XmlComponent {
     // The highest id of the endnotes, so the one after it is free
     // eslint-disable-next-line functional/prefer-readonly-type
     private highestId = 0;
+    // The separator, continuation separator and continuation notice, as they are in the endnotes
+    // eslint-disable-next-line functional/prefer-readonly-type
+    private readonly separators: Endnote[] = [];
 
     public constructor() {
         super("w:endnotes");
@@ -56,6 +60,8 @@ export class Endnotes extends XmlComponent {
         });
 
         this.root.push(begin);
+        // eslint-disable-next-line functional/immutable-data
+        this.separators.push(begin);
 
         const spacing = new Endnote({
             id: 0,
@@ -73,12 +79,43 @@ export class Endnotes extends XmlComponent {
         });
 
         this.root.push(spacing);
+        // eslint-disable-next-line functional/immutable-data
+        this.separators.push(spacing);
     }
 
-    public createEndnote(id: number, paragraph: readonly Paragraph[]): void {
+    /**
+     * Replaces the default separators with the given ones (the default ones stay for those not given).
+     *
+     * @param options - The separators' paragraphs
+     */
+    public setSeparators(options: INoteSeparatorsOptions): void {
+        const given = [
+            [EndnoteType.SEPARATOR, -1, options.separator],
+            [EndnoteType.CONTINUATION_SEPARATOR, 0, options.continuationSeparator],
+            [EndnoteType.CONTINUATION_NOTICE, 1, options.continuationNotice],
+        ] as const;
+        for (const [type, id, children] of given) {
+            if (children === undefined) {
+                continue;
+            }
+            const note = new Endnote({ id, type, children });
+            const replaced = this.separators[id + 1];
+            // in place of the default one, or after the separators
+            const at = replaced ? this.root.indexOf(replaced) : this.root.indexOf(this.separators[id]) + 1;
+
+            this.root.splice(at, replaced ? 1 : 0, note);
+            // eslint-disable-next-line functional/immutable-data
+            this.separators[id + 1] = note;
+            // eslint-disable-next-line functional/immutable-data
+            this.highestId = Math.max(this.highestId, id);
+        }
+    }
+
+    public createEndnote(id: number, paragraph: readonly Paragraph[], ownMark?: boolean): void {
         const endnote = new Endnote({
             id: id,
             children: paragraph,
+            ownMark,
         });
 
         this.root.push(endnote);
@@ -108,7 +145,7 @@ export class Endnotes extends XmlComponent {
             return existing;
         }
         const id = this.highestId + 1;
-        this.createEndnote(id, endnote.children);
+        this.createEndnote(id, endnote.children, endnote.ownMark);
         // eslint-disable-next-line functional/immutable-data
         this.ownNotes.set(reference, id);
         return id;

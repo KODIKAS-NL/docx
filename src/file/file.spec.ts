@@ -253,24 +253,6 @@ describe("File", () => {
                                     {
                                         "w:r": [
                                             {
-                                                "w:rPr": [
-                                                    {
-                                                        "w:rStyle": {
-                                                            _attr: {
-                                                                "w:val": "FootnoteReference",
-                                                            },
-                                                        },
-                                                    },
-                                                ],
-                                            },
-                                            {
-                                                "w:footnoteRef": {},
-                                            },
-                                        ],
-                                    },
-                                    {
-                                        "w:r": [
-                                            {
                                                 "w:separator": {},
                                             },
                                         ],
@@ -299,24 +281,6 @@ describe("File", () => {
                                                         "w:lineRule": "auto",
                                                     },
                                                 },
-                                            },
-                                        ],
-                                    },
-                                    {
-                                        "w:r": [
-                                            {
-                                                "w:rPr": [
-                                                    {
-                                                        "w:rStyle": {
-                                                            _attr: {
-                                                                "w:val": "FootnoteReference",
-                                                            },
-                                                        },
-                                                    },
-                                                ],
-                                            },
-                                            {
-                                                "w:footnoteRef": {},
                                             },
                                         ],
                                     },
