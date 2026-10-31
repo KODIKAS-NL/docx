@@ -11,7 +11,7 @@
 import type { IMediaData } from "@file/media";
 import { XmlComponent } from "@file/xml-components";
 
-import { createBlip } from "./blip";
+import { createBlip, type LuminanceOptions } from "./blip";
 import { type ICropOptions, SourceRectangle } from "./source-rectangle";
 import { Stretch } from "./stretch";
 
@@ -42,10 +42,10 @@ import { Stretch } from "./stretch";
  * ```
  */
 export class BlipFill extends XmlComponent {
-    public constructor(mediaData: IMediaData, crop?: ICropOptions) {
+    public constructor(mediaData: IMediaData, crop?: ICropOptions, luminance?: LuminanceOptions) {
         super("pic:blipFill");
 
-        this.root.push(createBlip(mediaData));
+        this.root.push(createBlip(mediaData, luminance));
         this.root.push(new SourceRectangle(crop));
         this.root.push(new Stretch());
     }

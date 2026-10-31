@@ -66,7 +66,22 @@ type BlipAttributes = {
  * @param mediaData - The media data containing the image information
  * @returns An XML component representing the blip element
  */
-export const createBlip = (mediaData: IMediaData): XmlComponent =>
+/**
+ * A picture's brightness and contrast (`a:lum`), each from -100 to 100 percent: Word's Washout is a brightness of 70 and a contrast
+ * of -70.
+ */
+export type LuminanceOptions = { readonly brightness?: number; readonly contrast?: number };
+
+const createLuminance = ({ brightness = 0, contrast = 0 }: LuminanceOptions): XmlComponent =>
+    new BuilderElement<{ readonly bright?: number; readonly contrast?: number }>({
+        name: "a:lum",
+        attributes: {
+            bright: { key: "bright", value: brightness ? Math.round(brightness * 1000) : undefined },
+            contrast: { key: "contrast", value: contrast ? Math.round(contrast * 1000) : undefined },
+        },
+    });
+
+export const createBlip = (mediaData: IMediaData, luminance?: LuminanceOptions): XmlComponent =>
     new BuilderElement<BlipAttributes>({
         name: "a:blip",
         attributes: {
@@ -79,5 +94,8 @@ export const createBlip = (mediaData: IMediaData): XmlComponent =>
                 value: "none",
             },
         },
-        children: mediaData.type === "svg" ? [createExtentionList(mediaData)] : [],
+        children: [
+            ...(luminance && (luminance.brightness || luminance.contrast) ? [createLuminance(luminance)] : []),
+            ...(mediaData.type === "svg" ? [createExtentionList(mediaData)] : []),
+        ],
     });

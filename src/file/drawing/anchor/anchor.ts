@@ -156,6 +156,7 @@ export class Anchor extends XmlComponent {
                 outline: drawingOptions.outline,
                 solidFill: drawingOptions.solidFill,
                 crop: drawingOptions.crop,
+                luminance: drawingOptions.luminance,
             }),
         );
     }

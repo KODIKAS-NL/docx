@@ -8,6 +8,7 @@ import { type EffectExtentAttributes, createEffectExtent } from "./../effect-ext
 import { createExtent } from "./../extent/extent";
 import { createGraphicFrameProperties } from "./../graphic-frame/graphic-frame-properties";
 import { Graphic } from "./../inline/graphic";
+import type { LuminanceOptions } from "./graphic/graphic-data/pic/blip/blip";
 import type { ICropOptions } from "./graphic/graphic-data/pic/blip/source-rectangle";
 import type { OutlineOptions } from "./graphic/graphic-data/pic/shape-properties/outline/outline";
 import type { SolidFillOptions } from "./graphic/graphic-data/pic/shape-properties/outline/solid-fill";
@@ -22,6 +23,7 @@ type InlineOptions = DrawingLinkOptions & {
     readonly outline?: OutlineOptions;
     readonly solidFill?: SolidFillOptions;
     readonly crop?: ICropOptions;
+    readonly luminance?: LuminanceOptions;
     readonly effectExtent?: EffectExtentAttributes;
 };
 
@@ -46,6 +48,7 @@ export const createInline = ({
     outline,
     solidFill,
     crop,
+    luminance,
     effectExtent,
     link,
     decorative,
@@ -85,6 +88,6 @@ export const createInline = ({
             ),
             new DocProperties(docProperties, { link, decorative }),
             createGraphicFrameProperties(mediaData.type !== "graphic" || mediaData.lockAspectRatio !== false),
-            new Graphic({ mediaData, transform, outline, solidFill, crop }),
+            new Graphic({ mediaData, transform, outline, solidFill, crop, luminance }),
         ],
     });

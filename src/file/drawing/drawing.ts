@@ -7,6 +7,7 @@ import type { DrawingLinkOptions } from "./doc-properties/non-visual-drawing-pro
 import type { EffectExtentAttributes } from "./effect-extent/effect-extent";
 import type { IFloating } from "./floating";
 import { createInline } from "./inline";
+import type { LuminanceOptions } from "./inline/graphic/graphic-data/pic/blip/blip";
 import type { ICropOptions } from "./inline/graphic/graphic-data/pic/blip/source-rectangle";
 import type { OutlineOptions } from "./inline/graphic/graphic-data/pic/shape-properties/outline/outline";
 import type { SolidFillOptions } from "./inline/graphic/graphic-data/pic/shape-properties/outline/solid-fill";
@@ -34,6 +35,8 @@ export type IDrawingOptions = DrawingLinkOptions & {
     readonly outline?: OutlineOptions;
     readonly solidFill?: SolidFillOptions;
     readonly crop?: ICropOptions;
+    /** The picture's brightness and contrast, in percent */
+    readonly luminance?: LuminanceOptions;
     /** How far the drawing's visible effects (such as a thick line) reach past its box, in EMUs */
     readonly effectExtent?: EffectExtentAttributes;
 };
@@ -69,6 +72,7 @@ export class Drawing extends XmlComponent {
                     outline: drawingOptions.outline,
                     solidFill: drawingOptions.solidFill,
                     crop: drawingOptions.crop,
+                    luminance: drawingOptions.luminance,
                     effectExtent: drawingOptions.effectExtent,
                     link: drawingOptions.link,
                     decorative: drawingOptions.decorative,

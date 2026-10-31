@@ -4,6 +4,7 @@ import { XmlComponent } from "@file/xml-components";
 
 import { GraphicDataAttributes } from "./graphic-data-attribute";
 import { Pic } from "./pic";
+import type { LuminanceOptions } from "./pic/blip/blip";
 import type { ICropOptions } from "./pic/blip/source-rectangle";
 import type { OutlineOptions } from "./pic/shape-properties/outline/outline";
 import type { SolidFillOptions } from "./pic/shape-properties/outline/solid-fill";
@@ -46,12 +47,14 @@ export class GraphicData extends XmlComponent {
         outline,
         solidFill,
         crop,
+        luminance,
     }: {
         readonly mediaData: IExtendedMediaData;
         readonly transform: IMediaDataTransformation;
         readonly outline?: OutlineOptions;
         readonly solidFill?: SolidFillOptions;
         readonly crop?: ICropOptions;
+        readonly luminance?: LuminanceOptions;
     }) {
         super("a:graphicData");
 
@@ -101,7 +104,7 @@ export class GraphicData extends XmlComponent {
                 }),
             );
             const md = mediaData as IMediaData;
-            const pic = new Pic({ mediaData: md, transform, outline, solidFill, crop });
+            const pic = new Pic({ mediaData: md, transform, outline, solidFill, crop, luminance });
             this.root.push(pic);
         }
 

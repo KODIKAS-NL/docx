@@ -96,6 +96,33 @@ describe("DocumentBackground", () => {
             expect(() => new DocumentBackground({ color: { theme: "accent1" }, themeTint: "99" })).to.throw("Invalid background");
         });
 
+        it("should write a picture fill as VML, its picture added to the file's media", () => {
+            const file = new File({ sections: [] });
+            const data = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+            const background = new DocumentBackground({ color: "FFFFFF", picture: { type: "png", data, fill: "frame" } });
+            const tree = new Formatter().format(background, { file, viewWrapper: file.Document, stack: [] });
+            const fileName = file.Media.Array[0].fileName;
+            expect(fileName).to.match(/\.png$/);
+            expect(tree).to.deep.equal({
+                "w:background": [
+                    { _attr: { "w:color": "FFFFFF" } },
+                    {
+                        "v:background": [
+                            { _attr: { id: "_x0000_s1025", "o:bwmode": "white", "o:targetscreensize": "1024,768" } },
+                            { "v:fill": { _attr: { "r:id": `rId{${fileName}}`, "o:title": "", recolor: "t", type: "frame" } } },
+                        ],
+                    },
+                ],
+            });
+        });
+
+        it("should tile a picture fill by default", () => {
+            const file = new File({ sections: [] });
+            const background = new DocumentBackground({ picture: { type: "png", data: new Uint8Array([1, 2, 3]) } });
+            const tree = new Formatter().format(background, { file, viewWrapper: file.Document, stack: [] });
+            expect(JSON.stringify(tree)).to.include('"type":"tile"');
+        });
+
         it("should throw for a theme color that isn't valid", () => {
             expect(() => new DocumentBackground({ color: { theme: "text1" as "dark1" } })).to.throw(
                 'Invalid theme color "text1". Did you mean "dark1"?',
