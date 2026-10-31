@@ -9,12 +9,16 @@ export const EndnoteType = {
     SEPARATOR: "separator",
 
     CONTINUATION_SEPARATOR: "continuationSeparator",
+
+    CONTINUATION_NOTICE: "continuationNotice",
 } as const;
 
 export type IEndnoteOptions = {
     readonly id: number;
     readonly type?: (typeof EndnoteType)[keyof typeof EndnoteType];
     readonly children: readonly Paragraph[];
+    /** The paragraphs hold the endnote's mark themselves (an {@link EndnoteRefRun}), so the first isn't given one */
+    readonly ownMark?: boolean;
 };
 
 export class Endnote extends XmlComponent {
@@ -27,8 +31,10 @@ export class Endnote extends XmlComponent {
             }),
         );
 
+        // A separator or a continuation notice has no mark
+        const marked = options.type === undefined && !options.ownMark;
         for (const [index, child] of options.children.entries()) {
-            this.root.push(index === 0 ? new FirstNoteParagraph(child, new EndnoteRefRun()) : child);
+            this.root.push(index === 0 && marked ? new FirstNoteParagraph(child, new EndnoteRefRun()) : child);
         }
     }
 }

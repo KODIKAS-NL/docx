@@ -8,6 +8,7 @@
  * @module
  */
 import type { FontOptions } from "@file/fonts/font-table";
+import type { INoteSeparatorsOptions } from "@file/footnotes/footnotes";
 import type { ICommentsOptions } from "@file/paragraph/run/comment-run";
 import type { IHyphenationOptions } from "@file/settings";
 import type { ICompatibilityOptions } from "@file/settings/compatibility";
@@ -75,6 +76,8 @@ export type IPropertiesOptions = {
             string,
             {
                 readonly children: readonly Paragraph[];
+                /** The paragraphs hold the footnote's mark themselves (a `FootnoteRefRun`) */
+                readonly ownMark?: boolean;
             }
         >
     >;
@@ -83,9 +86,24 @@ export type IPropertiesOptions = {
             string,
             {
                 readonly children: readonly Paragraph[];
+                /** The paragraphs hold the endnote's mark themselves (an `EndnoteRefRun`) */
+                readonly ownMark?: boolean;
             }
         >
     >;
+    /**
+     * The footnotes' separators in place of the default ones: the paragraphs of the separator between the text and the
+     * footnotes, of the separator above footnotes continued from the page before, and of the notice under a footnote
+     * that goes on on the next page. A separator's line is a `SeperatorRun` or `ContinuationSeperatorRun`
+     */
+    readonly footnoteSeparators?: INoteSeparatorsOptions;
+    /** The endnotes' separators in place of the default ones, as `footnoteSeparators` */
+    readonly endnoteSeparators?: INoteSeparatorsOptions;
+    /**
+     * Where the endnotes go when a section doesn't say (`w:endnotePr` in the settings, which Word reads only for this):
+     * at the end of each section or of the document
+     */
+    readonly endnotePosition?: "sectEnd" | "docEnd";
     readonly background?: IDocumentBackgroundOptions;
     readonly features?: {
         readonly trackRevisions?: boolean;

@@ -7,7 +7,7 @@
  *
  * @module
  */
-import { Run } from "@file/paragraph";
+import { type IRunOptions, Run } from "@file/paragraph";
 
 import { Seperator } from "./seperator";
 
@@ -20,8 +20,8 @@ import { Seperator } from "./seperator";
  * @internal
  */
 export class SeperatorRun extends Run {
-    public constructor() {
-        super({});
+    public constructor(options: IRunOptions = {}) {
+        super(options);
 
         this.root.push(new Seperator());
     }

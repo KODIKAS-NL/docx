@@ -27,6 +27,8 @@ export const FootnoteType = {
     SEPERATOR: "separator",
     /** Continuation separator for footnotes spanning pages */
     CONTINUATION_SEPERATOR: "continuationSeparator",
+    /** The notice at the end of a page whose footnote goes on on the next page */
+    CONTINUATION_NOTICE: "continuationNotice",
 } as const;
 
 /**
@@ -45,6 +47,8 @@ export type IFootnoteOptions = {
     readonly type?: (typeof FootnoteType)[keyof typeof FootnoteType];
     /** Paragraph content of the footnote */
     readonly children: readonly Paragraph[];
+    /** The paragraphs hold the footnote's mark themselves (a {@link FootnoteRefRun}), so the first isn't given one */
+    readonly ownMark?: boolean;
 };
 
 /**
@@ -91,8 +95,10 @@ export class Footnote extends XmlComponent {
             }),
         );
 
+        // A separator or a continuation notice has no mark
+        const marked = options.type === undefined && !options.ownMark;
         for (const [index, child] of options.children.entries()) {
-            this.root.push(index === 0 ? new FirstNoteParagraph(child, new FootnoteRefRun()) : child);
+            this.root.push(index === 0 && marked ? new FirstNoteParagraph(child, new FootnoteRefRun()) : child);
         }
     }
 }

@@ -110,8 +110,8 @@ describe("FootnoteReferenceRun", () => {
             expect(referencesIn(await read("word/document.xml"))).to.deep.equal(["foot 1", "foot 2"]);
             const footnotes = await read("word/footnotes.xml");
             expect(notesIn(footnotes, "footnote")).to.deep.equal(["1: SharedSecond paragraph", "2: SharedSecond paragraph"]);
-            // A number at the start of each footnote only: the separators' two, and one in each of these
-            expect(footnotes.split("<w:footnoteRef/>")).to.have.length(5);
+            // A number at the start of each footnote only, one in each of these (the separators have none, as Word's)
+            expect(footnotes.split("<w:footnoteRef/>")).to.have.length(3);
         });
 
         it("should give each document its own footnote, so content can be in more than one", async () => {

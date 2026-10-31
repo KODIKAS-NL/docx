@@ -6,7 +6,7 @@
  *
  * @module
  */
-import { Run } from "@file/paragraph";
+import { type IRunOptions, Run } from "@file/paragraph";
 
 import { FootnoteRef } from "./footnote-ref";
 
@@ -19,9 +19,10 @@ import { FootnoteRef } from "./footnote-ref";
  * @internal
  */
 export class FootnoteRefRun extends Run {
-    public constructor() {
+    public constructor(options: IRunOptions = {}) {
         super({
             style: "FootnoteReference",
+            ...options,
         });
 
         this.root.push(new FootnoteRef());

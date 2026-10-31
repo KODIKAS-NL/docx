@@ -8,7 +8,7 @@
  *
  * @module
  */
-import { NumberValueElement, OnOffElement, XmlAttributeComponent, XmlComponent } from "@file/xml-components";
+import { BuilderElement, NumberValueElement, OnOffElement, XmlAttributeComponent, XmlComponent } from "@file/xml-components";
 
 import { Compatibility, type ICompatibilityOptions } from "./compatibility";
 import { DocumentProtection, type IDocumentProtectionOptions } from "./document-protection";
@@ -190,6 +190,8 @@ export type ISettingsOptions = {
     readonly hyphenation?: IHyphenationOptions;
     /** What people can change in the document in Word, and the password that turns that protection off */
     readonly protection?: IDocumentProtectionOptions;
+    /** Where the endnotes go when a section doesn't say: at the end of each section or of the document */
+    readonly endnotePosition?: "sectEnd" | "docEnd";
 };
 
 /**
@@ -334,6 +336,21 @@ export class Settings extends XmlComponent {
 
         if (options.updateFields !== undefined) {
             this.root.push(new OnOffElement("w:updateFields", options.updateFields));
+        }
+
+        // https://c-rex.net/samples/ooxml/e1/Part4/OOXML_P4_DOCX_endnotePr_topic_ID0EWQZX.html
+        if (options.endnotePosition !== undefined) {
+            this.root.push(
+                new BuilderElement({
+                    name: "w:endnotePr",
+                    children: [
+                        new BuilderElement({
+                            name: "w:pos",
+                            attributes: { val: { key: "w:val", value: options.endnotePosition } },
+                        }),
+                    ],
+                }),
+            );
         }
 
         this.root.push(

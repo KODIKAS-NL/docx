@@ -1,22 +1,25 @@
-import type { NoteContent } from "@file/footnotes/footnote/run/reference-run";
+import { type INoteReferenceRunOptions, type NoteContent, noteReferenceContent } from "@file/footnotes/footnote/run/reference-run";
 import { Run } from "@file/paragraph/run";
 import { type IContext, type IXmlableObject, XmlAttributeComponent, XmlComponent } from "@file/xml-components";
 
 export class EndnoteReferenceRunAttributes extends XmlAttributeComponent<{
     readonly id: number;
+    readonly customMarkFollows?: 1;
 }> {
     protected readonly xmlKeys = {
         id: "w:id",
+        customMarkFollows: "w:customMarkFollows",
     };
 }
 
 export class EndnoteIdReference extends XmlComponent {
-    public constructor(id: number) {
+    public constructor(id: number, customMarkFollows?: boolean) {
         super("w:endnoteReference");
 
         this.root.push(
             new EndnoteReferenceRunAttributes({
                 id: id,
+                customMarkFollows: customMarkFollows ? 1 : undefined,
             }),
         );
     }
@@ -39,17 +42,21 @@ export class EndnoteIdReference extends XmlComponent {
  */
 export class EndnoteReferenceRun extends Run {
     private readonly endnote?: NoteContent;
+    private readonly customMark?: string;
 
     /**
      * @param endnote - The id of one of the document's `endnotes`, or the endnote's content, for an endnote of the run's
      * own. Word has endnotes only in a document's body, so a run with its endnote's content is left out of headers,
      * footers, comments and notes
+     * @param options - The run's formatting, and a mark of its own in place of the endnote's number
      */
-    public constructor(endnote: number | NoteContent) {
-        super({ style: "EndnoteReference" });
+    public constructor(endnote: number | NoteContent, options: INoteReferenceRunOptions = {}) {
+        const { customMark, ...run } = options;
+        super({ style: "EndnoteReference", ...run });
+        this.customMark = customMark;
 
         if (typeof endnote === "number") {
-            this.root.push(new EndnoteIdReference(endnote));
+            this.root.push(...noteReferenceContent(new EndnoteIdReference(endnote, customMark !== undefined), customMark));
         } else {
             this.endnote = endnote;
         }
@@ -67,11 +74,12 @@ export class EndnoteReferenceRun extends Run {
             return undefined;
         }
         // The reference is only in the run while it is written, as the id is the endnote's in the document it is in
-        this.root.push(new EndnoteIdReference(id));
+        const content = noteReferenceContent(new EndnoteIdReference(id, this.customMark !== undefined), this.customMark);
+        this.root.push(...content);
         try {
             return super.prepForXml(context);
         } finally {
-            this.root.pop();
+            this.root.splice(-content.length);
         }
     }
 }

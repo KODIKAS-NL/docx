@@ -9,7 +9,8 @@
  * @module
  */
 import type { Paragraph } from "@file/paragraph";
-import { Run } from "@file/paragraph/run";
+import { type IRunOptions, Run } from "@file/paragraph/run";
+import { Text } from "@file/paragraph/run/run-components/text";
 import { type IContext, type IXmlableObject, XmlAttributeComponent, XmlComponent } from "@file/xml-components";
 
 /**
@@ -22,7 +23,30 @@ import { type IContext, type IXmlableObject, XmlAttributeComponent, XmlComponent
 export type NoteContent = {
     /** The note's paragraphs */
     readonly children: readonly Paragraph[];
+    /**
+     * The paragraphs hold the note's mark themselves (a `FootnoteRefRun` or `EndnoteRefRun`, which can be styled and be
+     * anywhere in them), so the first paragraph isn't given one
+     */
+    readonly ownMark?: boolean;
 };
+
+/**
+ * The options of a footnote or endnote reference run: the run's formatting (its style is "FootnoteReference" or
+ * "EndnoteReference" unless it names another), and a mark of its own that it shows in place of the note's number
+ * (`w:customMarkFollows`, the mark is the run's text after the reference).
+ */
+export type INoteReferenceRunOptions = Omit<IRunOptions, "children" | "text" | "break"> & {
+    /** The mark the reference shows in place of the note's number */
+    readonly customMark?: string;
+};
+
+/**
+ * The reference element and the text of a custom mark after it.
+ *
+ * @internal
+ */
+export const noteReferenceContent = (reference: XmlComponent, customMark: string | undefined): readonly XmlComponent[] =>
+    customMark === undefined ? [reference] : [reference, new Text(customMark)];
 
 /**
  * Represents the attributes for a footnote reference element.
@@ -32,9 +56,12 @@ export type NoteContent = {
 export class FootNoteReferenceRunAttributes extends XmlAttributeComponent<{
     /** Unique identifier linking to the footnote */
     readonly id: number;
+    /** The reference shows a mark of its own, the run's text after it */
+    readonly customMarkFollows?: 1;
 }> {
     protected readonly xmlKeys = {
         id: "w:id",
+        customMarkFollows: "w:customMarkFollows",
     };
 }
 
@@ -55,12 +82,13 @@ export class FootNoteReferenceRunAttributes extends XmlAttributeComponent<{
  * @internal
  */
 export class FootnoteReference extends XmlComponent {
-    public constructor(id: number) {
+    public constructor(id: number, customMarkFollows?: boolean) {
         super("w:footnoteReference");
 
         this.root.push(
             new FootNoteReferenceRunAttributes({
                 id: id,
+                customMarkFollows: customMarkFollows ? 1 : undefined,
             }),
         );
     }
@@ -102,6 +130,7 @@ export class FootnoteReference extends XmlComponent {
  */
 export class FootnoteReferenceRun extends Run {
     private readonly footnote?: NoteContent;
+    private readonly customMark?: string;
 
     /**
      * Creates a new footnote reference run.
@@ -109,12 +138,15 @@ export class FootnoteReferenceRun extends Run {
      * @param footnote - The id of one of the document's `footnotes`, or the footnote's content, for a footnote of the
      * run's own. Word has footnotes only in a document's body, so a run with its footnote's content is left out of
      * headers, footers, comments and notes
+     * @param options - The run's formatting, and a mark of its own in place of the footnote's number
      */
-    public constructor(footnote: number | NoteContent) {
-        super({ style: "FootnoteReference" });
+    public constructor(footnote: number | NoteContent, options: INoteReferenceRunOptions = {}) {
+        const { customMark, ...run } = options;
+        super({ style: "FootnoteReference", ...run });
+        this.customMark = customMark;
 
         if (typeof footnote === "number") {
-            this.root.push(new FootnoteReference(footnote));
+            this.root.push(...noteReferenceContent(new FootnoteReference(footnote, customMark !== undefined), customMark));
         } else {
             this.footnote = footnote;
         }
@@ -132,11 +164,12 @@ export class FootnoteReferenceRun extends Run {
             return undefined;
         }
         // The reference is only in the run while it is written, as the id is the footnote's in the document it is in
-        this.root.push(new FootnoteReference(id));
+        const content = noteReferenceContent(new FootnoteReference(id, this.customMark !== undefined), this.customMark);
+        this.root.push(...content);
         try {
             return super.prepForXml(context);
         } finally {
-            this.root.pop();
+            this.root.splice(-content.length);
         }
     }
 }

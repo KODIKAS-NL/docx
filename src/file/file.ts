@@ -283,6 +283,7 @@ export class File {
             embedFonts: options.fonts?.length ? true : undefined,
             defaultTabStop: options.defaultTabStop,
             protection: options.protection,
+            endnotePosition: options.endnotePosition,
             hyphenation: {
                 autoHyphenation: options.hyphenation?.autoHyphenation,
                 hyphenationZone: options.hyphenation?.hyphenationZone,
@@ -335,17 +336,25 @@ export class File {
             this.addSection(section);
         }
 
+        if (options.footnoteSeparators) {
+            this.footnotesWrapper.View.setSeparators(options.footnoteSeparators);
+        }
+
+        if (options.endnoteSeparators) {
+            this.endnotesWrapper.View.setSeparators(options.endnoteSeparators);
+        }
+
         if (options.footnotes) {
             // eslint-disable-next-line guard-for-in
             for (const key in options.footnotes) {
-                this.footnotesWrapper.View.createFootNote(parseFloat(key), options.footnotes[key].children);
+                this.footnotesWrapper.View.createFootNote(parseFloat(key), options.footnotes[key].children, options.footnotes[key].ownMark);
             }
         }
 
         if (options.endnotes) {
             // eslint-disable-next-line guard-for-in
             for (const key in options.endnotes) {
-                this.endnotesWrapper.View.createEndnote(parseFloat(key), options.endnotes[key].children);
+                this.endnotesWrapper.View.createEndnote(parseFloat(key), options.endnotes[key].children, options.endnotes[key].ownMark);
             }
         }
 
