@@ -120,7 +120,11 @@ export type ITablePropertiesOptions = {
  * Reference: http://officeopenxml.com/WPtableProperties.php
  */
 export class TableProperties extends IgnoreIfEmptyXmlComponent {
-    public constructor(options: ITablePropertiesOptions) {
+    /**
+     * @param inStyle - the properties of a table style, whose borders are the sides given only (a table with no style gets the
+     * sides it isn't given)
+     */
+    public constructor(options: ITablePropertiesOptions, inStyle = false) {
         super("w:tblPr", options.includeIfEmpty);
 
         if (options.style) {
@@ -166,7 +170,7 @@ export class TableProperties extends IgnoreIfEmptyXmlComponent {
 
         if (options.borders) {
             // A table with a style takes the sides it isn't given from the style
-            this.root.push(new TableBorders(options.borders, { fillMissingSides: !options.style }));
+            this.root.push(new TableBorders(options.borders, { fillMissingSides: !options.style && !inStyle }));
         }
 
         if (options.shading) {

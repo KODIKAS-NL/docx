@@ -31,6 +31,14 @@ export type IFontAttributesProperties = {
     readonly hAnsi?: string;
     /** Hint for font selection algorithm */
     readonly hint?: string;
+    /**
+     * A theme font per character set, in place of or beside a named font (ST_Theme: `majorHAnsi`, `minorEastAsia`,
+     * `majorBidi` and so on): the theme's font is used, the named one where the theme has none
+     */
+    readonly asciiTheme?: string;
+    readonly hAnsiTheme?: string;
+    readonly eastAsiaTheme?: string;
+    readonly cstheme?: string;
 };
 
 /**
@@ -134,6 +142,10 @@ export const createRunFonts = (nameOrAttrs: string | IFontAttributesProperties |
             eastAsia: { key: "w:eastAsia", value: attrs.eastAsia },
             hAnsi: { key: "w:hAnsi", value: attrs.hAnsi },
             hint: { key: "w:hint", value: attrs.hint },
+            asciiTheme: { key: "w:asciiTheme", value: attrs.asciiTheme },
+            hAnsiTheme: { key: "w:hAnsiTheme", value: attrs.hAnsiTheme },
+            eastAsiaTheme: { key: "w:eastAsiaTheme", value: attrs.eastAsiaTheme },
+            cstheme: { key: "w:cstheme", value: attrs.cstheme },
         },
     });
 };
