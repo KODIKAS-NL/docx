@@ -50,4 +50,13 @@ describe("createRunFonts", () => {
             },
         });
     });
+
+    it("writes a theme font per character set beside the named fonts", () => {
+        const tree = new Formatter().format(
+            createRunFonts({ ascii: "Arial", hAnsi: "Arial", eastAsiaTheme: "minorEastAsia", cstheme: "minorBidi" }),
+        );
+        expect(tree).to.deep.equal({
+            "w:rFonts": { _attr: { "w:ascii": "Arial", "w:hAnsi": "Arial", "w:eastAsiaTheme": "minorEastAsia", "w:cstheme": "minorBidi" } },
+        });
+    });
 });

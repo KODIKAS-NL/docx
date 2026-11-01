@@ -77,6 +77,15 @@ export type IStyleOptions = {
     /** Display name of the style */
     readonly name?: string;
     /**
+     * Other names of the style (`w:aliases`), comma separated: names a user gave it, which an application can show in place
+     * of its name (for a built-in style, the name it has in the application's language)
+     */
+    readonly aliases?: string;
+    /** Whether this is the default style of its type (`w:default`) */
+    readonly default?: boolean;
+    /** Whether this is a style of the user's own, not one of the application's built-in styles (`w:customStyle`) */
+    readonly customStyle?: boolean;
+    /**
      * Specifies the style upon which the current style is based-that is, the style from which the current style inherits. It is the mechanism for implementing style inheritance.
      * Note that if the type of the current style must match the type of the style upon which it is based or the basedOn element will be ignored.
      * However, if the current style is a numbering style, then the `basedOn` element is ignored.
@@ -163,9 +172,19 @@ class StyleAttributes extends XmlAttributeComponent<IStyleAttributes> {
 export class Style extends XmlComponent {
     public constructor(attributes: IStyleAttributes, options: IStyleOptions) {
         super("w:style");
-        this.root.push(new StyleAttributes(attributes));
+        this.root.push(
+            new StyleAttributes({
+                ...attributes,
+                default: attributes.default ?? (options.default || undefined),
+                customStyle: attributes.customStyle ?? (options.customStyle ? "1" : undefined),
+            }),
+        );
         if (options.name) {
             this.root.push(new Name(options.name));
+        }
+
+        if (options.aliases) {
+            this.root.push(new StringValueElement("w:aliases", options.aliases));
         }
 
         // A style based on itself isn't based on another, so it isn't written, as Word leaves it out when it saves the

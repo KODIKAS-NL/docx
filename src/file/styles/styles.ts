@@ -10,9 +10,10 @@
 import type { IDefaultStylesOptions } from "@file/styles/factory";
 import { type BaseXmlComponent, type IContext, type IXmlableObject, type ImportedXmlComponent, XmlComponent } from "@file/xml-components";
 
-import { StyleForCharacter, StyleForParagraph, isDefaultTableOfContentsStyle } from "./style";
+import { StyleForCharacter, StyleForParagraph, StyleForTable, isDefaultTableOfContentsStyle } from "./style";
 import type { ICharacterStyleOptions } from "./style/character-style";
 import type { IParagraphStyleOptions } from "./style/paragraph-style";
+import type { ITableStyleOptions } from "./style/table-style";
 
 /**
  * Options for configuring document styles.
@@ -37,6 +38,8 @@ export type IStylesOptions = {
     readonly paragraphStyles?: readonly IParagraphStyleOptions[];
     /** Array of custom character style definitions. Each takes the place of a default or external style with its id */
     readonly characterStyles?: readonly ICharacterStyleOptions[];
+    /** Array of table style definitions. Each takes the place of a default or external style with its id */
+    readonly tableStyles?: readonly ITableStyleOptions[];
     /** Array of styles imported from external sources */
     readonly importedStyles?: readonly (XmlComponent | StyleForParagraph | StyleForCharacter | ImportedXmlComponent)[];
 };
@@ -134,6 +137,12 @@ export class Styles extends XmlComponent {
         if (options.characterStyles) {
             for (const style of options.characterStyles) {
                 this.root.push(new StyleForCharacter(style));
+            }
+        }
+
+        if (options.tableStyles) {
+            for (const style of options.tableStyles) {
+                this.root.push(new StyleForTable(style));
             }
         }
     }
