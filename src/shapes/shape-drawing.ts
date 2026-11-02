@@ -77,6 +77,33 @@ export type IShapePictureOptions = DrawingLinkOptions & {
 };
 
 /**
+ * The box a group's children are positioned in (`a:chOff`, `a:chExt`), in pixels: a file's own child space, kept as it is.
+ *
+ * @publicApi
+ */
+export type ShapeChildSpace = {
+    readonly left: number;
+    readonly top: number;
+    readonly width: number;
+    readonly height: number;
+};
+
+/**
+ * The child space in EMUs: the given one, or the box around the children.
+ */
+export const childSpaceOf = (
+    box: Bounds,
+    space: ShapeChildSpace | undefined,
+): { readonly childOffset: Point; readonly childExtent: Point } => {
+    if (space) {
+        const childOffset = { x: Math.round(space.left * EMUS_PER_PIXEL), y: Math.round(space.top * EMUS_PER_PIXEL) };
+        return { childOffset, childExtent: { x: Math.round(space.width * EMUS_PER_PIXEL), y: Math.round(space.height * EMUS_PER_PIXEL) } };
+    }
+    const childOffset = { x: Math.round(box.left), y: Math.round(box.top) };
+    return { childOffset, childExtent: { x: Math.round(box.right) - childOffset.x, y: Math.round(box.bottom) - childOffset.y } };
+};
+
+/**
  * A group of shapes inside a {@link ShapeGroupRun} or {@link ShapeCanvasRun}, which moves, scales and rotates as one.
  *
  * Its children are positioned relative to each other, like the children of a `ShapeGroupRun`, and `transformation.offset`
@@ -99,6 +126,8 @@ export type IShapeNestedGroupOptions = DrawingLinkOptions & {
     };
     /** Places the children that have no `offset`, such as in a flowchart, tree or grid */
     readonly layout?: ShapeLayout;
+    /** The box, in pixels, the children are positioned in, which is stretched over the group. Default is the box around them */
+    readonly childSpace?: ShapeChildSpace;
     /** The lane of the flow the group goes in, by its name. See `ShapeFlowLayout.lanes` */
     readonly lane?: string;
     /** Name, description and title used by screen readers */
@@ -1105,8 +1134,7 @@ type InnerGroup = {
 
 const layoutInnerGroup = (node: Extract<Node, { readonly kind: "group" }>, allIds: ReadonlySet<string>, styles: TextStyles): InnerGroup => {
     const inner = layoutGroup(node.children, allIds, styles, node.options.layout, node.laneIds);
-    const childOffset = { x: Math.round(inner.box.left), y: Math.round(inner.box.top) };
-    const childExtent = { x: Math.round(inner.box.right) - childOffset.x, y: Math.round(inner.box.bottom) - childOffset.y };
+    const { childOffset, childExtent } = childSpaceOf(inner.box, node.options.childSpace);
     const { width, height } = node.options.transformation ?? {};
     return {
         layout: inner,

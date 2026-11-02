@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { type PresetShapeType, getOoxmlShapeName, isConnectorShapeType } from "./preset-shape-type";
+import { type PresetShapeType, getOoxmlShapeName, getPresetShapeType, isConnectorShapeType } from "./preset-shape-type";
 
 describe("getOoxmlShapeName", () => {
     it("should map readable names to their OOXML names", () => {
@@ -38,5 +38,13 @@ describe("isConnectorShapeType", () => {
         expect(isConnectorShapeType("rectangle")).to.equal(false);
         expect(isConnectorShapeType("rightArrow")).to.equal(false);
         expect(isConnectorShapeType("flowChartConnector")).to.equal(false);
+    });
+});
+
+describe("getPresetShapeType", () => {
+    it("should name a preset by its OOXML name", () => {
+        expect(getPresetShapeType("roundRect")).to.equal("roundedRectangle");
+        expect(getPresetShapeType("straightConnector1")).to.equal("straightConnector");
+        expect(getPresetShapeType("notAShape")).to.equal(undefined);
     });
 });

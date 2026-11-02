@@ -68,6 +68,7 @@ export type {
     CustomShapePath,
     CustomShapePathFill,
     CustomShapeTextArea,
+    CustomShapeViewBox,
 } from "./custom-geometry";
 export type { ShapeSize, ShapeTransformation } from "./shape-text-size";
 export type {

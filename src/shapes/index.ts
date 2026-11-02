@@ -31,3 +31,4 @@ export * from "./shape-run";
 export * from "./shape-group-run";
 export * from "./shape-canvas-run";
 export * from "./shape-connector";
+export { getPresetShapeType, getShapeAdjustments } from "./preset-shape";
