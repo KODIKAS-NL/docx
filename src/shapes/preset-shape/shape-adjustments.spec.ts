@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { PRESET_SHAPE_GEOMETRY } from "./preset-shape-geometry";
 import type { PresetShapeType } from "./preset-shape-type";
-import { PRESET_SHAPE_ADJUSTMENTS, createShapeGuides } from "./shape-adjustments";
+import { PRESET_SHAPE_ADJUSTMENTS, createShapeGuides, getShapeAdjustments } from "./shape-adjustments";
 
 describe("createShapeGuides", () => {
     it("should write a percentage in thousandths of a percent", () => {
@@ -75,5 +75,16 @@ describe("createShapeGuides", () => {
         for (const type of Object.keys(PRESET_SHAPE_ADJUSTMENTS)) {
             expect(PRESET_SHAPE_GEOMETRY[type as PresetShapeType], type).to.not.equal(undefined);
         }
+    });
+});
+
+describe("getShapeAdjustments", () => {
+    it("should read the adjustments back from the guides createShapeGuides writes", () => {
+        expect(getShapeAdjustments("roundedRectangle", { adj: 25000 })).to.deep.equal({ cornerRadius: 25 });
+        expect(getShapeAdjustments("pie", createShapeGuides("pie", { startAngle: 10, endAngle: 270 }))).to.deep.equal({
+            startAngle: 10,
+            endAngle: 270,
+        });
+        expect(getShapeAdjustments("rectangle", { adj: 5 })).to.deep.equal({});
     });
 });

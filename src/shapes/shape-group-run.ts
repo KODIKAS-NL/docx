@@ -26,6 +26,8 @@ import { createStyledDrawing } from "./drawing/styled-drawing";
 import { describeDrawing } from "./shape-description";
 import {
     type IShapeGroupChildOptions,
+    type ShapeChildSpace,
+    childSpaceOf,
     createShapeDrawingNodes,
     drawingStyledParagraphs,
     getGroupEffectExtent,
@@ -35,7 +37,7 @@ import type { ShapeLayout } from "./shape-layout";
 import { createDrawingProperties } from "./shape-run-data";
 import type { TextStyles } from "../text-layout";
 
-export type { IShapeGroupChildOptions, IShapeNestedGroupOptions, IShapePictureOptions } from "./shape-drawing";
+export type { IShapeGroupChildOptions, IShapeNestedGroupOptions, IShapePictureOptions, ShapeChildSpace } from "./shape-drawing";
 export type { ShapeFlowLayout, ShapeGridLayout, ShapeLane, ShapeLayout, ShapeLayoutDirection, ShapeTreeLayout } from "./shape-layout";
 
 /**
@@ -57,6 +59,8 @@ export type IShapeGroupOptions = DrawingLinkOptions & {
      * as a tree like an org chart, or in a grid
      */
     readonly layout?: ShapeLayout;
+    /** The box, in pixels, the children are positioned in, which is stretched over the group. Default is the box around them */
+    readonly childSpace?: ShapeChildSpace;
     /** Floats the group on the page instead of placing it inline with text */
     readonly floating?: IFloating;
     /** Name, description and title used by screen readers */
@@ -106,9 +110,8 @@ export class ShapeGroupRun extends Run {
             const layout = layoutShapeDrawing(nodes, { layout: options.layout, styles });
             const { children, bounds } = layout;
 
-            // The children's coordinate space is the box around them, in EMUs
-            const childOffset = { x: Math.round(bounds.left), y: Math.round(bounds.top) };
-            const childExtent = { x: Math.round(bounds.right) - childOffset.x, y: Math.round(bounds.bottom) - childOffset.y };
+            // The children's coordinate space is the box around them, in EMUs, or the one given
+            const { childOffset, childExtent } = childSpaceOf(bounds, options.childSpace);
 
             const groupTransformation: IMediaDataTransformation = options.transformation
                 ? createTransformation({ ...options.transformation, offset: undefined })

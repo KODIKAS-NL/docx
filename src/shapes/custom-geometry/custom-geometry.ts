@@ -74,6 +74,12 @@ export type CustomShapeConnectionPoint = {
  */
 export type CustomShapeGeometry = {
     /**
+     * The box the paths are drawn in, from (0, 0) in their units, which is stretched over the shape, as an SVG's
+     * `viewBox` or DrawingML's path width and height: a path keeps its place in the shape where it doesn't reach the
+     * box's sides. Default is the box around the paths
+     */
+    readonly viewBox?: CustomShapeViewBox;
+    /**
      * Where the text goes, in the units of the paths, such as the body of a speech bubble without its tail. Default is
      * the whole shape
      */
@@ -103,9 +109,20 @@ export type CustomShapeGeometry = {
 );
 
 /**
+ * The width and height of the box a custom shape's paths are drawn in.
+ *
+ * @publicApi
+ */
+export type CustomShapeViewBox = {
+    readonly width: number;
+    readonly height: number;
+};
+
+/**
  * A custom shape's geometry options, as the shape's options give them.
  */
 export type CustomGeometryOptions = {
+    readonly viewBox?: CustomShapeViewBox;
     readonly path?: string;
     readonly paths?: readonly CustomShapePath[];
     readonly textArea?: CustomShapeTextArea;
@@ -411,7 +428,13 @@ const scaleTextArea = (textArea: CustomShapeTextArea, scale: Scale): CustomGeome
  */
 export const createCustomGeometryData = (options: CustomGeometryOptions, width: number, height: number): CustomGeometry => {
     const paths = readPaths(options);
-    const bounds = unionOf(paths.map(({ segments }) => getPathBounds(segments)));
+    const { viewBox } = options;
+    if (viewBox && !(viewBox.width > 0 && viewBox.height > 0)) {
+        throw new Error(`Invalid view box ${JSON.stringify(viewBox)}. Expected a width and a height above 0`);
+    }
+    const bounds = viewBox
+        ? { left: 0, top: 0, right: viewBox.width, bottom: viewBox.height }
+        : unionOf(paths.map(({ segments }) => getPathBounds(segments)));
     const pathWidth = bounds.right - bounds.left;
     const pathHeight = bounds.bottom - bounds.top;
     const x = pathWidth > 0 ? width / pathWidth : 0;

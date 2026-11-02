@@ -480,3 +480,21 @@ describe("createCustomGeometry", () => {
         ]);
     });
 });
+
+describe("createCustomGeometryData with a view box", () => {
+    it("should stretch the view box over the shape, keeping where the path is in it", () => {
+        const { paths } = createCustomGeometryData({ viewBox: { width: 10, height: 100 }, path: "M 1 10 L 9 10 L 9 90 Z" }, 1000, 1000);
+        expect(paths[0].segments).to.deep.equal([
+            { type: "move", to: { x: 100, y: 100 } },
+            { type: "line", to: { x: 900, y: 100 } },
+            { type: "line", to: { x: 900, y: 900 } },
+            { type: "close" },
+        ]);
+    });
+
+    it("should reject an empty view box", () => {
+        expect(() => createCustomGeometryData({ viewBox: { width: 0, height: 10 }, path: "M 0 0 L 1 1" }, 100, 100)).to.throw(
+            "Invalid view box",
+        );
+    });
+});

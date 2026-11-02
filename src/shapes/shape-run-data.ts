@@ -87,6 +87,7 @@ export const createPresetShapeData = (options: WithPresetShape<ShapeBaseOptions>
         options.type === "custom"
             ? {
                   type: "custom",
+                  viewBox: options.viewBox,
                   path: options.path,
                   paths: options.paths,
                   textArea: options.textArea,

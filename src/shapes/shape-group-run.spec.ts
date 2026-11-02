@@ -152,6 +152,23 @@ describe("ShapeGroupRun", () => {
         ]);
     });
 
+    it("should keep a child space of its own, which the children need not fill", () => {
+        const tree = new Formatter().format(
+            new ShapeGroupRun({
+                transformation: { width: 200, height: 100 },
+                childSpace: { left: 0, top: 0, width: 400, height: 200 },
+                children: [{ type: "rectangle", transformation: { offset: { left: 100, top: 50 }, width: 100, height: 50 } }],
+            }),
+        );
+
+        expect(getChild(getContainer(tree), "wp:extent")).to.deep.equal({ "wp:extent": { _attr: { cx: 1905000, cy: 952500 } } });
+        const transform = getGroup(tree)[1]["wpg:grpSpPr"][0]["a:xfrm"];
+        expect(transform.slice(3)).to.deep.equal([
+            { "a:chOff": { _attr: { x: 0, y: 0 } } },
+            { "a:chExt": { _attr: { cx: 3810000, cy: 1905000 } } },
+        ]);
+    });
+
     it("should scale, rotate and float the group with its own transformation", () => {
         const tree = new Formatter().format(
             new ShapeGroupRun({

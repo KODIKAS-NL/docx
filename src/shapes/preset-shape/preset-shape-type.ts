@@ -242,6 +242,15 @@ export const getOoxmlShapeName = (type: PresetShapeType): string => {
     return ooxmlName;
 };
 
+/**
+ * The preset shape of a name in OOXML (`a:prstGeom/@prst`), such as `"roundedRectangle"` for `"roundRect"`, for a
+ * shape read from a file; undefined for a name that isn't a preset.
+ *
+ * @publicApi
+ */
+export const getPresetShapeType = (ooxmlName: string): PresetShapeType | undefined =>
+    NAMES_BY_OOXML_NAME.get(ooxmlName) as PresetShapeType | undefined;
+
 const CONNECTOR_SHAPE_TYPES: ReadonlySet<PresetShapeType> = new Set<PresetShapeType>([
     "line",
     "inverseLine",

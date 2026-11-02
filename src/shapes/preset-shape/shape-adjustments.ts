@@ -1169,3 +1169,24 @@ export const createShapeGuides = (
         }),
     );
 };
+
+/**
+ * A shape's adjustments from the shape guides of its `a:avLst`, keyed by guide name, for a shape read from a file: the
+ * inverse of {@link createShapeGuides}. A guide the shape has no adjustment for is left out.
+ *
+ * @publicApi
+ *
+ * @example
+ * ```typescript
+ * getShapeAdjustments("roundedRectangle", { adj: 25000 }); // { cornerRadius: 25 }
+ * ```
+ */
+export const getShapeAdjustments = (type: PresetShapeType, guides: Readonly<Record<string, number>>): Readonly<Record<string, number>> => {
+    const definitions: Readonly<Record<string, AdjustmentDefinition>> =
+        type in PRESET_SHAPE_ADJUSTMENTS ? PRESET_SHAPE_ADJUSTMENTS[type as keyof PresetShapeAdjustments] : {};
+    return Object.fromEntries(
+        Object.entries(definitions).flatMap(([name, { guide, factor, offset = 0 }]) =>
+            guides[guide] === undefined ? [] : [[name, (guides[guide] - offset) / factor] as const],
+        ),
+    );
+};
