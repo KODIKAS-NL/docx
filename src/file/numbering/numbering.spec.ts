@@ -110,6 +110,39 @@ describe("Numbering", () => {
                 expect(numbering.ConcreteNumbering).to.have.length(2);
             });
 
+            it("should leave the default bullet list out when asked", () => {
+                const numbering = new Numbering({ config: [{ reference: "own", levels: [{ level: 0 }] }], defaultBullets: false });
+                expect(numbering.ConcreteNumbering).to.have.length(0);
+                expect(numbering.ReferenceConfig).to.have.length(1);
+                numbering.createConcreteNumberingInstance("own", 0);
+                const xml = JSON.stringify(new Formatter().format(numbering));
+                expect(xml).not.to.include("default-bullet-numbering");
+                expect(xml.match(/"w:abstractNum"/g)).to.have.length(1);
+                expect(xml.match(/"w:num"/g)).to.have.length(1);
+            });
+
+            it("should give an instance exactly the start overrides its definition lists for it", () => {
+                const numbering = new Numbering({
+                    config: [
+                        {
+                            reference: "shared",
+                            levels: [{ level: 0 }, { level: 1 }],
+                            instances: { 0: [], 1: [{ level: 1, start: 5 }] },
+                        },
+                    ],
+                });
+                numbering.createConcreteNumberingInstance("shared", 0);
+                numbering.createConcreteNumberingInstance("shared", 1);
+                numbering.createConcreteNumberingInstance("shared", 2);
+                const overrides = numbering.ConcreteNumbering.slice(1).map((num) =>
+                    JSON.stringify(new Formatter().format(num))
+                        .match(/"w:lvlOverride":\[\{"_attr":\{"w:ilvl":\d+\}\},\{"w:startOverride":\{"_attr":\{"w:val":\d+\}\}\}\]/g)
+                        ?.map((override) => override.replace(/\D+/g, " ").trim()),
+                );
+                // none for the first, level 1 at 5 for the second, every level over for one not listed
+                expect(overrides).to.deep.equal([undefined, ["1 5"], ["0 1", "1 1"]]);
+            });
+
             it("should add a list's own definition, and number the list from its first level's start", () => {
                 const numbering = new Numbering({ config: [] });
 
