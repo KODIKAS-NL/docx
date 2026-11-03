@@ -34,6 +34,11 @@ export type NumberingDefinition = {
     readonly levels: readonly ILevelsOptions[];
     /** Unique reference name for this numbering configuration. */
     readonly reference: string;
+    /**
+     * The start overrides (`w:lvlOverride/w:startOverride`) of its instances, by instance: an instance listed here gets exactly
+     * these, none for an empty list; one not listed starts over at every configured level.
+     */
+    readonly instances?: Readonly<Record<number, readonly { readonly level: number; readonly start: number }[]>>;
 };
 
 /**
@@ -46,6 +51,11 @@ export type NumberingDefinition = {
 export type INumberingOptions = {
     /** Array of numbering configurations, each with levels and a reference name. */
     readonly config: readonly NumberingDefinition[];
+    /**
+     * Whether the document gets the default bullet list (`default-bullet-numbering`, `w:numId` 1) that `bullet` paragraphs use;
+     * true by default. A document without `bullet` paragraphs can leave it out, so it has no list nothing uses.
+     */
+    readonly defaultBullets?: boolean;
 };
 
 /**
@@ -113,6 +123,7 @@ export class Numbering extends XmlComponent {
     private readonly abstractNumberingMap = new Map<string, AbstractNumbering>();
     private readonly concreteNumberingMap = new Map<string, ConcreteNumbering>();
     private readonly referenceConfigMap = new Map<string, readonly ILevelsOptions[]>();
+    private readonly referenceInstancesMap = new Map<string, NonNullable<NumberingDefinition["instances"]>>();
     private readonly abstractNumUniqueNumericId = abstractNumUniqueNumericIdGen();
     private readonly concreteNumUniqueNumericId = concreteNumUniqueNumericIdGen();
 
@@ -235,6 +246,24 @@ export class Numbering extends XmlComponent {
             },
         ]);
 
+        if (options.defaultBullets !== false) {
+            this.addDefaultBullets(abstractNumbering);
+        }
+
+        for (const con of options.config) {
+            // eslint-disable-next-line functional/immutable-data
+            this.abstractNumberingMap.set(con.reference, new AbstractNumbering(this.abstractNumUniqueNumericId(), con.levels));
+            // eslint-disable-next-line functional/immutable-data
+            this.referenceConfigMap.set(con.reference, con.levels);
+            if (con.instances) {
+                // eslint-disable-next-line functional/immutable-data
+                this.referenceInstancesMap.set(con.reference, con.instances);
+            }
+        }
+    }
+
+    /** Adds the default bullet list, `w:numId` 1, which `bullet` paragraphs refer to. */
+    private addDefaultBullets(abstractNumbering: AbstractNumbering): void {
         // eslint-disable-next-line functional/immutable-data
         this.concreteNumberingMap.set(
             "default-bullet-numbering",
@@ -254,13 +283,6 @@ export class Numbering extends XmlComponent {
 
         // eslint-disable-next-line functional/immutable-data
         this.abstractNumberingMap.set("default-bullet-numbering", abstractNumbering);
-
-        for (const con of options.config) {
-            // eslint-disable-next-line functional/immutable-data
-            this.abstractNumberingMap.set(con.reference, new AbstractNumbering(this.abstractNumUniqueNumericId(), con.levels));
-            // eslint-disable-next-line functional/immutable-data
-            this.referenceConfigMap.set(con.reference, con.levels);
-        }
     }
 
     /**
@@ -306,6 +328,10 @@ export class Numbering extends XmlComponent {
             );
             // eslint-disable-next-line functional/immutable-data
             this.referenceConfigMap.set(definition.reference, definition.levels);
+            if (definition.instances) {
+                // eslint-disable-next-line functional/immutable-data
+                this.referenceInstancesMap.set(definition.reference, definition.instances);
+            }
         }
 
         const abstractNumbering = this.abstractNumberingMap.get(reference);
@@ -330,10 +356,15 @@ export class Numbering extends XmlComponent {
             reference,
             instance,
             restartedListId,
-            overrideLevels: referenceConfigLevels.map(({ level, start = 1 }) => ({
-                num: level,
-                start: decimalNumber(start),
-            })),
+            // an instance with start overrides of its own gets those (a restarted list keeps starting over)
+            overrideLevels:
+                (restartedListId === undefined ? this.referenceInstancesMap.get(reference)?.[instance] : undefined)?.map(
+                    ({ level, start }) => ({ num: level, start: decimalNumber(start) }),
+                ) ??
+                referenceConfigLevels.map(({ level, start = 1 }) => ({
+                    num: level,
+                    start: decimalNumber(start),
+                })),
         };
 
         // eslint-disable-next-line functional/immutable-data
