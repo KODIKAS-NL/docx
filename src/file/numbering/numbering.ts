@@ -36,9 +36,11 @@ export type NumberingDefinition = {
     readonly reference: string;
     /**
      * The start overrides (`w:lvlOverride/w:startOverride`) of its instances, by instance: an instance listed here gets exactly
-     * these, none for an empty list; one not listed starts over at every configured level.
+     * these, none for an empty list; one not listed starts over at every configured level. An entry with a `definition` also replaces that level (`w:lvl`) for the instance.
      */
-    readonly instances?: Readonly<Record<number, readonly { readonly level: number; readonly start: number }[]>>;
+    readonly instances?: Readonly<
+        Record<number, readonly { readonly level: number; readonly start?: number; readonly definition?: ILevelsOptions }[]>
+    >;
 };
 
 /**
@@ -359,7 +361,11 @@ export class Numbering extends XmlComponent {
             // an instance with start overrides of its own gets those (a restarted list keeps starting over)
             overrideLevels:
                 (restartedListId === undefined ? this.referenceInstancesMap.get(reference)?.[instance] : undefined)?.map(
-                    ({ level, start }) => ({ num: level, start: decimalNumber(start) }),
+                    ({ level, start, definition }) => ({
+                        num: level,
+                        start: start === undefined ? undefined : decimalNumber(start),
+                        level: definition,
+                    }),
                 ) ??
                 referenceConfigLevels.map(({ level, start = 1 }) => ({
                     num: level,

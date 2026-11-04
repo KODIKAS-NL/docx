@@ -12,6 +12,8 @@
 import { Attributes, XmlAttributeComponent, XmlComponent } from "@file/xml-components";
 import { decimalNumber } from "@util/values";
 
+import { type ILevelsOptions, LevelForOverride } from "./level";
+
 /**
  * Reference to an abstract numbering definition.
  */
@@ -47,6 +49,8 @@ type IOverrideLevel = {
     readonly num: number;
     /** The starting number for this level. */
     readonly start?: number;
+    /** The list's own definition of the level (`w:lvl`), in place of the abstract numbering's. */
+    readonly level?: ILevelsOptions;
 };
 
 /**
@@ -146,7 +150,7 @@ export class ConcreteNumbering extends XmlComponent {
 
         if (options.overrideLevels && options.overrideLevels.length) {
             for (const level of options.overrideLevels) {
-                this.root.push(new LevelOverride(level.num, level.start));
+                this.root.push(new LevelOverride(level.num, level.start, level.level));
             }
         }
     }
@@ -185,12 +189,16 @@ export class LevelOverride extends XmlComponent {
      *
      * @param levelNum - The level number to override (0-8)
      * @param start - Optional starting number for the level
+     * @param level - Optional definition of the level, which replaces the abstract numbering's
      */
-    public constructor(levelNum: number, start?: number) {
+    public constructor(levelNum: number, start?: number, level?: ILevelsOptions) {
         super("w:lvlOverride");
         this.root.push(new LevelOverrideAttributes({ ilvl: levelNum }));
         if (start !== undefined) {
             this.root.push(new StartOverride(start));
+        }
+        if (level) {
+            this.root.push(new LevelForOverride({ ...level, level: levelNum }));
         }
     }
 }
