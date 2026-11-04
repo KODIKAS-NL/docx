@@ -221,6 +221,29 @@ describe("Numbering", () => {
                 });
             });
 
+            it("should write a level an instance defines for itself, and a start override only where it has one", () => {
+                const numbering = new Numbering({
+                    defaultBullets: false,
+                    config: [
+                        {
+                            reference: "ref",
+                            levels: [{ level: 0, format: LevelFormat.DECIMAL, text: "%1." }],
+                            instances: {
+                                0: [],
+                                1: [{ level: 0, definition: { level: 0, format: LevelFormat.UPPER_ROMAN, text: "[%1]" } }],
+                            },
+                        },
+                    ],
+                });
+                numbering.createConcreteNumberingInstance("ref", 0);
+                numbering.createConcreteNumberingInstance("ref", 1);
+                const json = JSON.stringify(new Formatter().format(numbering));
+
+                expect(json).to.include('"w:lvlOverride":[{"_attr":{"w:ilvl":0}},{"w:lvl"');
+                expect(json).to.include('"w:lvlText":{"_attr":{"w:val":"[%1]"}}');
+                expect(json.match(/w:startOverride/g)).to.equal(null);
+            });
+
             it("should add a list's own definition once, however many paragraphs and instances give it", () => {
                 const numbering = new Numbering({ config: [] });
                 const definition = { reference: "own-list", levels: [{ level: 0, format: LevelFormat.DECIMAL, text: "%1." }] };
