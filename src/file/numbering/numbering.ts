@@ -34,6 +34,8 @@ export type NumberingDefinition = {
     readonly levels: readonly ILevelsOptions[];
     /** Unique reference name for this numbering configuration. */
     readonly reference: string;
+    /** How the levels are used: `singleLevel`, `multilevel` or `hybridMultilevel` (the default) */
+    readonly multiLevelType?: "singleLevel" | "multilevel" | "hybridMultilevel";
     /**
      * The start overrides (`w:lvlOverride/w:startOverride`) of its instances, by instance: an instance listed here gets exactly
      * these, none for an empty list; one not listed starts over at every configured level. An entry with a `definition` also replaces that level (`w:lvl`) for the instance.
@@ -254,7 +256,7 @@ export class Numbering extends XmlComponent {
 
         for (const con of options.config) {
             // eslint-disable-next-line functional/immutable-data
-            this.abstractNumberingMap.set(con.reference, new AbstractNumbering(this.abstractNumUniqueNumericId(), con.levels));
+            this.abstractNumberingMap.set(con.reference, new AbstractNumbering(this.abstractNumUniqueNumericId(), con.levels, con.multiLevelType));
             // eslint-disable-next-line functional/immutable-data
             this.referenceConfigMap.set(con.reference, con.levels);
             if (con.instances) {
@@ -326,7 +328,7 @@ export class Numbering extends XmlComponent {
             // eslint-disable-next-line functional/immutable-data
             this.abstractNumberingMap.set(
                 definition.reference,
-                new AbstractNumbering(this.abstractNumUniqueNumericId(), definition.levels),
+                new AbstractNumbering(this.abstractNumUniqueNumericId(), definition.levels, definition.multiLevelType),
             );
             // eslint-disable-next-line functional/immutable-data
             this.referenceConfigMap.set(definition.reference, definition.levels);

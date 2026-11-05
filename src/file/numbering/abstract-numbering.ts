@@ -85,8 +85,9 @@ export class AbstractNumbering extends XmlComponent {
      *
      * @param id - Unique identifier for this abstract numbering definition
      * @param levelOptions - Array of level definitions (up to 9 levels)
+     * @param multiLevelType - How the definition's levels are used, as Word's interface treats them
      */
-    public constructor(id: number, levelOptions: readonly ILevelsOptions[]) {
+    public constructor(id: number, levelOptions: readonly ILevelsOptions[], multiLevelType = "hybridMultilevel") {
         super("w:abstractNum");
         this.root.push(
             new AbstractNumberingAttributes({
@@ -94,7 +95,7 @@ export class AbstractNumbering extends XmlComponent {
                 restartNumberingAfterBreak: 0,
             }),
         );
-        this.root.push(new MultiLevelType("hybridMultilevel"));
+        this.root.push(new MultiLevelType(multiLevelType));
         this.id = id;
 
         for (const option of levelOptions) {

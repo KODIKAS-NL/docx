@@ -10,6 +10,12 @@ import { AbstractNumbering } from "./abstract-numbering";
 import { LevelFormat, LevelSuffix } from "./level";
 
 describe("AbstractNumbering", () => {
+    it("writes the multi-level type it is given, and hybridMultilevel otherwise", () => {
+        const type = (numbering: AbstractNumbering) => JSON.stringify(new Formatter().format(numbering));
+        expect(type(new AbstractNumbering(1, []))).to.include('"w:multiLevelType":{"_attr":{"w:val":"hybridMultilevel"}}');
+        expect(type(new AbstractNumbering(1, [], "multilevel"))).to.include('"w:multiLevelType":{"_attr":{"w:val":"multilevel"}}');
+    });
+
     it("stores its ID at its .id property", () => {
         const abstractNumbering = new AbstractNumbering(5, []);
         expect(abstractNumbering.id).to.equal(5);
