@@ -73,7 +73,7 @@ export const CharacterSet = {
  * @property embedItalic - Embedded italic font relationship
  * @property embedBoldItalic - Embedded bold-italic font relationship
  */
-export type IFontDescription = Pick<FontOptions, "name" | "altName" | "panose1" | "family" | "pitch"> & {
+export type IFontDescription = Pick<FontOptions, "name" | "altName" | "panose1" | "family" | "pitch" | "sig"> & {
     /** Character set identifier, as the document gives it */
     readonly charset?: string;
 };

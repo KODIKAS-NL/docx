@@ -8,7 +8,17 @@ describe("FontWrapper", () => {
     it("should describe fonts it doesn't embed, without relationships", () => {
         const wrapper = new FontWrapper(
             [],
-            [{ name: "Arial", altName: "Helvetica", panose1: "020B0604020202020204", charset: "00", family: "swiss", pitch: "variable" }],
+            [
+                {
+                    name: "Arial",
+                    altName: "Helvetica",
+                    panose1: "020B0604020202020204",
+                    charset: "00",
+                    family: "swiss",
+                    pitch: "variable",
+                    sig: { usb0: "1", usb1: "2", usb2: "3", usb3: "4", csb0: "5", csb1: "6" },
+                },
+            ],
         );
         expect(new Formatter().format(wrapper.View)["w:fonts"][1]).to.deep.equal({
             "w:font": [
@@ -18,6 +28,7 @@ describe("FontWrapper", () => {
                 { "w:charset": { _attr: { "w:val": "00" } } },
                 { "w:family": { _attr: { "w:val": "swiss" } } },
                 { "w:pitch": { _attr: { "w:val": "variable" } } },
+                { "w:sig": { _attr: { "w:usb0": "1", "w:usb1": "2", "w:usb2": "3", "w:usb3": "4", "w:csb0": "5", "w:csb1": "6" } } },
             ],
         });
         expect(wrapper.files).to.deep.equal([]);
