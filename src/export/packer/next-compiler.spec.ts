@@ -13,6 +13,25 @@ import { Compiler } from "./next-compiler";
 import { textOf, unzip } from "../../tests/zip";
 
 describe("Compiler", () => {
+    it("should leave out the notes parts a document doesn't use, with omitUnusedNotes", () => {
+        const compiled = (options: Partial<ConstructorParameters<typeof File>[0]>) =>
+            new Compiler().compile(new File({ sections: [{ children: [] }], ...options }));
+        const text = (files: ReadonlyMap<string, unknown>, path: string) => files.get(path) as string;
+
+        const unused = compiled({ omitUnusedNotes: true });
+        expect([...unused.keys()]).not.to.include.members(["word/footnotes.xml", "word/_rels/footnotes.xml.rels", "word/endnotes.xml"]);
+        expect(text(unused, "word/_rels/document.xml.rels")).not.to.include("otes.xml");
+        expect(text(unused, "[Content_Types].xml")).not.to.include("/word/footnotes.xml");
+
+        const used = compiled({ omitUnusedNotes: true, footnotes: { 1: { children: [] } } });
+        expect([...used.keys()])
+            .to.include("word/footnotes.xml")
+            .and.not.include("word/endnotes.xml");
+        expect(text(used, "[Content_Types].xml")).to.include("/word/footnotes.xml").and.not.include("/word/endnotes.xml");
+
+        expect([...compiled({}).keys()]).to.include("word/endnotes.xml");
+    });
+
     let compiler: Compiler;
 
     beforeEach(() => {

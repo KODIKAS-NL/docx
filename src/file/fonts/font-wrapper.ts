@@ -7,6 +7,7 @@
  *
  * @module
  */
+import type { IFontDescription } from "./font";
 import type { IViewWrapper } from "@file/document-wrapper";
 import { Relationships } from "@file/relationships";
 import type { XmlComponent } from "@file/xml-components";
@@ -66,7 +67,10 @@ export class FontWrapper implements IViewWrapper {
     /** The files of the faces the fonts embed, in order: the Nth is `fonts/font<N>.odttf`, with the relationship `rId<N>` */
     public readonly files: readonly EmbeddedFontFile[] = [];
 
-    public constructor(public readonly options: readonly FontOptions[]) {
+    public constructor(
+        public readonly options: readonly FontOptions[],
+        descriptions: readonly IFontDescription[] = [],
+    ) {
         const faces = options.map((font) =>
             FACES.flatMap(({ option, element, bold, italic }) => {
                 const data = font[option];
@@ -84,6 +88,7 @@ export class FontWrapper implements IViewWrapper {
                     faces[index].map(({ element, file }) => [element, { id: `rId${this.files.indexOf(file) + 1}`, fontKey: file.fontKey }]),
                 ),
             })),
+            descriptions,
         );
         this.relationships = new Relationships();
 

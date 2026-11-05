@@ -205,6 +205,7 @@ export class File {
     private readonly commentsIds?: CommentsIds;
     private readonly fontWrapper: FontWrapper;
     private readonly theme: Theme;
+    private readonly omitUnusedNotes: boolean;
     private readonly packageParts: PackageParts;
     private readonly macros?: FileMacros;
     private readonly bibliography?: FileBibliography;
@@ -277,13 +278,14 @@ export class File {
         this.settings = new Settings({
             compatibilityModeVersion: options.compatabilityModeVersion,
             compatibility: options.compatibility,
-            evenAndOddHeaders: options.evenAndOddHeaderAndFooters ? true : false,
+            evenAndOddHeaders: options.evenAndOddHeaderAndFooters,
             trackRevisions: options.features?.trackRevisions,
             updateFields: options.features?.updateFields,
             embedFonts: options.fonts?.length ? true : undefined,
             defaultTabStop: options.defaultTabStop,
             protection: options.protection,
             endnotePosition: options.endnotePosition,
+            ...options.settings,
             hyphenation: {
                 autoHyphenation: options.hyphenation?.autoHyphenation,
                 hyphenationZone: options.hyphenation?.hyphenationZone,
@@ -360,9 +362,10 @@ export class File {
             }
         }
 
-        this.fontWrapper = new FontWrapper(options.fonts ?? []);
+        this.fontWrapper = new FontWrapper(options.fonts ?? [], options.fontDescriptions);
 
         this.theme = new Theme(options.theme);
+        this.omitUnusedNotes = options.omitUnusedNotes ?? false;
         // After the headers and footers, so their relationships keep the ids they had before documents had a theme
         this.documentWrapper.Relationships.addRelationship(
             // eslint-disable-next-line functional/immutable-data
@@ -616,6 +619,14 @@ export class File {
 
     public get FontTable(): FontWrapper {
         return this.fontWrapper;
+    }
+
+    /** The notes parts to leave out of the package, by `omitUnusedNotes` */
+    public get UnusedNoteParts(): readonly string[] {
+        if (!this.omitUnusedNotes) {
+            return [];
+        }
+        return [...(this.footnotesWrapper.View.Used ? [] : ["footnotes.xml"]), ...(this.endnotesWrapper.View.Used ? [] : ["endnotes.xml"])];
     }
 
     /** The document's theme (word/theme/theme1.xml). */

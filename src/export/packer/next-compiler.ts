@@ -6,6 +6,7 @@
 import type { File } from "@file/file";
 import { obfuscate } from "@file/fonts/obfuscate-ttf-to-odttf";
 import { Relationships } from "@file/relationships";
+import type { IXmlableObject } from "@file/xml-components";
 import { stringifyXmlable } from "@util/xml";
 import type { ZipFileData } from "@util/zip";
 
@@ -97,6 +98,16 @@ type IXmlifyedFileMapping = {
     readonly BibliographySourcesRelationships?: IXmlifyedFile;
 };
 
+/** The relationships or content types of a part's XML, without those of the parts in word/ given. */
+const withoutParts = (xml: IXmlableObject, parts: readonly string[]): IXmlableObject => {
+    const [[root, children]] = Object.entries(xml);
+    const isOmitted = (child: IXmlableObject): boolean => {
+        const attributes = Object.values(child)[0] as { readonly _attr?: Readonly<Record<string, string>> };
+        return parts.some((part) => attributes._attr?.Target === part || attributes._attr?.PartName === `/word/${part}`);
+    };
+    return { [root]: (children as readonly IXmlableObject[]).filter((child) => !isOmitted(child)) } as IXmlableObject;
+};
+
 /**
  * Compiles File objects into the files of OOXML-compliant packages.
  *
@@ -146,9 +157,12 @@ export class Compiler {
         overrides: readonly IXmlifyedFile[] = [],
     ): ReadonlyMap<string, ZipFileData> {
         const { PackageParts: packageParts, ...xmlifiedFileMapping } = this.xmlifyFile(file, prettifyXml);
-        const xmlifiedFiles = Object.values(xmlifiedFileMapping).flatMap((obj: IXmlifyedFile | readonly IXmlifyedFile[]) =>
-            Array.isArray(obj) ? (obj as readonly IXmlifyedFile[]) : [obj as IXmlifyedFile],
-        );
+        const omitted = file.UnusedNoteParts.flatMap((part) => [`word/${part}`, `word/_rels/${part}.rels`]);
+        const xmlifiedFiles = Object.values(xmlifiedFileMapping)
+            .flatMap((obj: IXmlifyedFile | readonly IXmlifyedFile[]) =>
+                Array.isArray(obj) ? (obj as readonly IXmlifyedFile[]) : [obj as IXmlifyedFile],
+            )
+            .filter(({ path }) => !omitted.includes(path));
 
         // A path given again, such as by an override, keeps its place with the later data
         return new Map<string, ZipFileData>([
@@ -263,11 +277,14 @@ export class Compiler {
                     );
 
                     return stringifyXmlable(
-                        this.formatter.format(relationships, {
-                            viewWrapper: file.Document,
-                            file,
-                            stack: [],
-                        }),
+                        withoutParts(
+                            this.formatter.format(relationships, {
+                                viewWrapper: file.Document,
+                                file,
+                                stack: [],
+                            }),
+                            file.UnusedNoteParts,
+                        ),
                         {
                             indent: prettify,
                             declaration: {
@@ -854,11 +871,14 @@ export class Compiler {
             // Last, as parts are added to the package, with their content types, while the others are written
             ContentTypes: {
                 data: stringifyXmlable(
-                    this.formatter.format(file.ContentTypes, {
-                        viewWrapper: file.Document,
-                        file,
-                        stack: [],
-                    }),
+                    withoutParts(
+                        this.formatter.format(file.ContentTypes, {
+                            viewWrapper: file.Document,
+                            file,
+                            stack: [],
+                        }),
+                        file.UnusedNoteParts,
+                    ),
                     {
                         indent: prettify,
                         declaration: {

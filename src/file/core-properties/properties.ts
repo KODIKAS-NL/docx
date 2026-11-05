@@ -7,10 +7,11 @@
  *
  * @module
  */
+import type { IFontDescription } from "@file/fonts/font";
 import type { FontOptions } from "@file/fonts/font-table";
 import type { INoteSeparatorsOptions } from "@file/footnotes/footnotes";
 import type { ICommentsOptions } from "@file/paragraph/run/comment-run";
-import type { IHyphenationOptions } from "@file/settings";
+import type { IHyphenationOptions, ISettingsOptions } from "@file/settings";
 import type { ICompatibilityOptions } from "@file/settings/compatibility";
 import type { IDocumentProtectionOptions } from "@file/settings/document-protection";
 import { StringContainer, XmlAttributeComponent, XmlComponent } from "@file/xml-components";
@@ -115,6 +116,15 @@ export type IPropertiesOptions = {
     readonly evenAndOddHeaderAndFooters?: boolean;
     readonly defaultTabStop?: number;
     readonly fonts?: readonly FontOptions[];
+    /** What the document says of fonts it names without embedding them, by which a reader substitutes a font it doesn't have */
+    readonly fontDescriptions?: readonly IFontDescription[];
+    /** Further settings of the document (word/settings.xml) */
+    readonly settings?: Pick<
+        ISettingsOptions,
+        "mirrorMargins" | "noLineBreaksAfter" | "noLineBreaksBefore" | "themeFontLanguages" | "decimalSymbol" | "listSeparator"
+    >;
+    /** Leave out `footnotes.xml` or `endnotes.xml` where the document has no notes of the kind and no separators of its own */
+    readonly omitUnusedNotes?: boolean;
     readonly hyphenation?: IHyphenationOptions;
     /**
      * The document's theme: its colors, and its fonts for headings and body text. Every document has a theme, Office's

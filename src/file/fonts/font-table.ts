@@ -10,7 +10,7 @@
 import { BuilderElement, type XmlComponent } from "@file/xml-components";
 
 import { type EmbeddedFontOptions, createEmbeddedFont } from "./create-embedded-font";
-import type { CharacterSet } from "./font";
+import { type CharacterSet, type FontOptions as FontElementOptions, type IFontDescription, createFont } from "./font";
 
 // <xsd:complexType name="CT_FontsList">
 //     <xsd:sequence>
@@ -53,7 +53,7 @@ export type FontOptions = {
  * </xsd:complexType>
  * ```
  */
-export const createFontTable = (fonts: readonly EmbeddedFontOptions[]): XmlComponent =>
+export const createFontTable = (fonts: readonly EmbeddedFontOptions[], descriptions: readonly IFontDescription[] = []): XmlComponent =>
     // https://c-rex.net/projects/samples/ooxml/e1/Part4/OOXML_P4_DOCX_Font_topic_ID0ERNCU.html
     // http://www.datypic.com/sc/ooxml/e-w_fonts.html
     new BuilderElement({
@@ -71,5 +71,8 @@ export const createFontTable = (fonts: readonly EmbeddedFontOptions[]): XmlCompo
             w16se: { key: "xmlns:w16se", value: "http://schemas.microsoft.com/office/word/2015/wordml/symex" },
             Ignorable: { key: "mc:Ignorable", value: "w14 w15 w16se w16cid w16 w16cex w16sdtdh" },
         },
-        children: fonts.map(createEmbeddedFont),
+        children: [
+            ...fonts.map(createEmbeddedFont),
+            ...descriptions.map((font) => createFont({ ...font, charset: font.charset as FontElementOptions["charset"] })),
+        ],
     });

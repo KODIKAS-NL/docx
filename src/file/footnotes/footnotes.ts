@@ -77,6 +77,9 @@ export class FootNotes extends XmlComponent {
     // The highest id of the footnotes, so the one after it is free
     // eslint-disable-next-line functional/prefer-readonly-type
     private highestId = 0;
+    // Whether it has a note or separators of the document's own, so the part is needed
+    // eslint-disable-next-line functional/prefer-readonly-type
+    private used = false;
     // The separator, continuation separator and continuation notice, as they are in the footnotes
     // eslint-disable-next-line functional/prefer-readonly-type
     private readonly separators: Footnote[] = [];
@@ -151,6 +154,8 @@ export class FootNotes extends XmlComponent {
      * @param options - The separators' paragraphs
      */
     public setSeparators(options: INoteSeparatorsOptions): void {
+        // eslint-disable-next-line functional/immutable-data
+        this.used = true;
         const given = [
             [FootnoteType.SEPERATOR, -1, options.separator],
             [FootnoteType.CONTINUATION_SEPERATOR, 0, options.continuationSeparator],
@@ -180,6 +185,8 @@ export class FootNotes extends XmlComponent {
      * @param paragraph - Array of paragraphs that make up the footnote content
      */
     public createFootNote(id: number, paragraph: readonly Paragraph[], ownMark?: boolean): void {
+        // eslint-disable-next-line functional/immutable-data
+        this.used = true;
         const footnote = new Footnote({
             id: id,
             children: paragraph,
@@ -215,8 +222,15 @@ export class FootNotes extends XmlComponent {
         const id = this.highestId + 1;
         this.createFootNote(id, footnote.children, footnote.ownMark);
         // eslint-disable-next-line functional/immutable-data
+        // eslint-disable-next-line functional/immutable-data
+        this.used = true;
         this.ownNotes.set(reference, id);
         return id;
+    }
+
+    /** Whether it has a note or separators of the document's own */
+    public get Used(): boolean {
+        return this.used;
     }
 
     /**

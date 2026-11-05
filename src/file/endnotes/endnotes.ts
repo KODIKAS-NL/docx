@@ -15,6 +15,9 @@ export class Endnotes extends XmlComponent {
     // The highest id of the endnotes, so the one after it is free
     // eslint-disable-next-line functional/prefer-readonly-type
     private highestId = 0;
+    // Whether it has a note or separators of the document's own, so the part is needed
+    // eslint-disable-next-line functional/prefer-readonly-type
+    private used = false;
     // The separator, continuation separator and continuation notice, as they are in the endnotes
     // eslint-disable-next-line functional/prefer-readonly-type
     private readonly separators: Endnote[] = [];
@@ -89,6 +92,8 @@ export class Endnotes extends XmlComponent {
      * @param options - The separators' paragraphs
      */
     public setSeparators(options: INoteSeparatorsOptions): void {
+        // eslint-disable-next-line functional/immutable-data
+        this.used = true;
         const given = [
             [EndnoteType.SEPARATOR, -1, options.separator],
             [EndnoteType.CONTINUATION_SEPARATOR, 0, options.continuationSeparator],
@@ -112,6 +117,8 @@ export class Endnotes extends XmlComponent {
     }
 
     public createEndnote(id: number, paragraph: readonly Paragraph[], ownMark?: boolean): void {
+        // eslint-disable-next-line functional/immutable-data
+        this.used = true;
         const endnote = new Endnote({
             id: id,
             children: paragraph,
@@ -147,8 +154,15 @@ export class Endnotes extends XmlComponent {
         const id = this.highestId + 1;
         this.createEndnote(id, endnote.children, endnote.ownMark);
         // eslint-disable-next-line functional/immutable-data
+        // eslint-disable-next-line functional/immutable-data
+        this.used = true;
         this.ownNotes.set(reference, id);
         return id;
+    }
+
+    /** Whether it has a note or separators of the document's own */
+    public get Used(): boolean {
+        return this.used;
     }
 
     /**

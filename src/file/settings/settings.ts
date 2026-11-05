@@ -8,7 +8,14 @@
  *
  * @module
  */
-import { BuilderElement, NumberValueElement, OnOffElement, XmlAttributeComponent, XmlComponent } from "@file/xml-components";
+import {
+    BuilderElement,
+    NumberValueElement,
+    OnOffElement,
+    StringValueElement,
+    XmlAttributeComponent,
+    XmlComponent,
+} from "@file/xml-components";
 
 import { Compatibility, type ICompatibilityOptions } from "./compatibility";
 import { DocumentProtection, type IDocumentProtectionOptions } from "./document-protection";
@@ -192,6 +199,44 @@ export type ISettingsOptions = {
     readonly protection?: IDocumentProtectionOptions;
     /** Where the endnotes go when a section doesn't say: at the end of each section or of the document */
     readonly endnotePosition?: "sectEnd" | "docEnd";
+    /** Swap the inside and outside margins of even pages, for pages printed on both sides */
+    readonly mirrorMargins?: boolean;
+    /** The characters a line may not end with, per language (`w:noLineBreaksAfter`) */
+    readonly noLineBreaksAfter?: readonly IKinsokuOptions[];
+    /** The characters a line may not start with, per language (`w:noLineBreaksBefore`) */
+    readonly noLineBreaksBefore?: readonly IKinsokuOptions[];
+    /** The languages that choose the theme's fonts for each kind of script */
+    readonly themeFontLanguages?: IThemeFontLanguagesOptions;
+    /** The character the document's fields use as the decimal symbol */
+    readonly decimalSymbol?: string;
+    /** The character the document's fields use to separate a list */
+    readonly listSeparator?: string;
+};
+
+/**
+ * The characters of a language that a line may not start or end with.
+ *
+ * @see {@link ISettingsOptions}
+ */
+export type IKinsokuOptions = {
+    /** The language, such as `ja-JP` */
+    readonly language: string;
+    /** The characters */
+    readonly characters: string;
+};
+
+/**
+ * The languages that choose the fonts of a document's theme, by kind of script.
+ *
+ * @see {@link ISettingsOptions}
+ */
+export type IThemeFontLanguagesOptions = {
+    /** The language for Latin text */
+    readonly value?: string;
+    /** The language for East Asian text */
+    readonly eastAsia?: string;
+    /** The language for complex scripts */
+    readonly bidirectional?: string;
 };
 
 /**
@@ -294,6 +339,10 @@ export class Settings extends XmlComponent {
             this.root.push(new OnOffElement("w:embedTrueTypeFonts", options.embedFonts));
         }
 
+        if (options.mirrorMargins !== undefined) {
+            this.root.push(new OnOffElement("w:mirrorMargins", options.mirrorMargins));
+        }
+
         // https://c-rex.net/projects/samples/ooxml/e1/Part4/OOXML_P4_DOCX_trackRevisions_topic_ID0EKXKY.html
         if (options.trackRevisions !== undefined) {
             this.root.push(new OnOffElement("w:trackRevisions", options.trackRevisions));
@@ -334,6 +383,23 @@ export class Settings extends XmlComponent {
             this.root.push(new OnOffElement("w:evenAndOddHeaders", options.evenAndOddHeaders));
         }
 
+        for (const [name, kinsoku] of [
+            ["w:noLineBreaksAfter", options.noLineBreaksAfter],
+            ["w:noLineBreaksBefore", options.noLineBreaksBefore],
+        ] as const) {
+            for (const { language, characters } of kinsoku ?? []) {
+                this.root.push(
+                    new BuilderElement({
+                        name,
+                        attributes: {
+                            language: { key: "w:lang", value: language },
+                            characters: { key: "w:val", value: characters },
+                        },
+                    }),
+                );
+            }
+        }
+
         if (options.updateFields !== undefined) {
             this.root.push(new OnOffElement("w:updateFields", options.updateFields));
         }
@@ -359,5 +425,27 @@ export class Settings extends XmlComponent {
                 version: options.compatibility?.version ?? options.compatibilityModeVersion ?? 15,
             }),
         );
+
+        if (options.themeFontLanguages !== undefined) {
+            const { value, eastAsia, bidirectional } = options.themeFontLanguages;
+            this.root.push(
+                new BuilderElement<{ readonly value?: string; readonly eastAsia?: string; readonly bidirectional?: string }>({
+                    name: "w:themeFontLang",
+                    attributes: {
+                        value: { key: "w:val", value },
+                        eastAsia: { key: "w:eastAsia", value: eastAsia },
+                        bidirectional: { key: "w:bidi", value: bidirectional },
+                    },
+                }),
+            );
+        }
+
+        if (options.decimalSymbol !== undefined) {
+            this.root.push(new StringValueElement("w:decimalSymbol", options.decimalSymbol));
+        }
+
+        if (options.listSeparator !== undefined) {
+            this.root.push(new StringValueElement("w:listSeparator", options.listSeparator));
+        }
     }
 }

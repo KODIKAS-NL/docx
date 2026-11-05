@@ -5,6 +5,24 @@ import { Formatter } from "@export/formatter";
 import { FontWrapper } from "./font-wrapper";
 
 describe("FontWrapper", () => {
+    it("should describe fonts it doesn't embed, without relationships", () => {
+        const wrapper = new FontWrapper(
+            [],
+            [{ name: "Arial", altName: "Helvetica", panose1: "020B0604020202020204", charset: "00", family: "swiss", pitch: "variable" }],
+        );
+        expect(new Formatter().format(wrapper.View)["w:fonts"][1]).to.deep.equal({
+            "w:font": [
+                { _attr: { "w:name": "Arial" } },
+                { "w:altName": { _attr: { "w:val": "Helvetica" } } },
+                { "w:panose1": { _attr: { "w:val": "020B0604020202020204" } } },
+                { "w:charset": { _attr: { "w:val": "00" } } },
+                { "w:family": { _attr: { "w:val": "swiss" } } },
+                { "w:pitch": { _attr: { "w:val": "variable" } } },
+            ],
+        });
+        expect(wrapper.files).to.deep.equal([]);
+    });
+
     it("emits sequential `fonts/font<N>.odttf` relationship Targets for each embedded font", () => {
         // Regression for https://github.com/dolanmiu/docx/issues/3019 —
         // relationship Targets used to embed the user-facing family name

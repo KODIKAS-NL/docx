@@ -3,4 +3,4 @@
  *
  * @module
  */
-export { CharacterSet } from "./font";
+export { CharacterSet, type IFontDescription } from "./font";

@@ -5,6 +5,35 @@ import { Formatter } from "@export/formatter";
 import { Settings } from "./settings";
 
 describe("Settings", () => {
+    it("should write the document's further settings in the schema's order", () => {
+        const tree = new Formatter().format(
+            new Settings({
+                evenAndOddHeaders: true,
+                mirrorMargins: true,
+                noLineBreaksAfter: [{ language: "ja-JP", characters: "$" }],
+                noLineBreaksBefore: [{ language: "ja-JP", characters: "!" }],
+                themeFontLanguages: { value: "nl-NL", eastAsia: "ja-JP", bidirectional: "ar-SA" },
+                decimalSymbol: ",",
+                listSeparator: ";",
+            }),
+        );
+        const names = (tree["w:settings"] as readonly object[]).map((child) => Object.keys(child)[0]).filter((name) => name !== "_attr");
+        expect(names).to.deep.equal([
+            "w:displayBackgroundShape",
+            "w:mirrorMargins",
+            "w:defaultTabStop",
+            "w:evenAndOddHeaders",
+            "w:noLineBreaksAfter",
+            "w:noLineBreaksBefore",
+            "w:compat",
+            "w:themeFontLang",
+            "w:decimalSymbol",
+            "w:listSeparator",
+        ]);
+        expect(JSON.stringify(tree)).to.include('"w:themeFontLang":{"_attr":{"w:val":"nl-NL","w:eastAsia":"ja-JP","w:bidi":"ar-SA"}}');
+        expect(JSON.stringify(tree)).to.include('"w:noLineBreaksAfter":{"_attr":{"w:lang":"ja-JP","w:val":"$"}}');
+    });
+
     describe("#constructor", () => {
         it("should create a empty Settings with correct rootKey", () => {
             const settings = new Settings({});
