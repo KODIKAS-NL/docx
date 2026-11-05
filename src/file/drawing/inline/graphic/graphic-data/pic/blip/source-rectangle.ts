@@ -12,18 +12,19 @@ import { XmlAttributeComponent, XmlComponent } from "@file/xml-components";
 /**
  * Options for cropping an image.
  *
- * Each value is a percentage (0-100) of the image dimension to crop away
- * from the given edge. For example, `{ left: 10 }` crops 10% off the left
- * side of the image.
+ * Each value is a percentage of the image dimension to crop away from the
+ * given edge. For example, `{ left: 10 }` crops 10% off the left side of the
+ * image. A negative value leaves that much empty space beside the image, as
+ * Word writes a picture cropped outside its edges.
  */
 export type ICropOptions = {
-    /** Percentage (0-100) of the image width to crop from the left edge. */
+    /** Percentage of the image width to crop from the left edge. */
     readonly left?: number;
-    /** Percentage (0-100) of the image height to crop from the top edge. */
+    /** Percentage of the image height to crop from the top edge. */
     readonly top?: number;
-    /** Percentage (0-100) of the image width to crop from the right edge. */
+    /** Percentage of the image width to crop from the right edge. */
     readonly right?: number;
-    /** Percentage (0-100) of the image height to crop from the bottom edge. */
+    /** Percentage of the image height to crop from the bottom edge. */
     readonly bottom?: number;
 };
 
@@ -52,14 +53,14 @@ class SourceRectangleAttributes extends XmlAttributeComponent<{
 /**
  * Converts a crop percentage to thousandths of a percent.
  *
- * @throws If the percentage isn't a number from 0 to 100
+ * @throws If the percentage isn't a finite number
  */
 const cropValue = (value: number | undefined, edge: keyof ICropOptions): number | undefined => {
     if (value === undefined) {
         return undefined;
     }
-    if (!(value >= 0 && value <= 100)) {
-        throw new Error(`Invalid crop ${edge} ${value}. Expected a number from 0 to 100`);
+    if (!Number.isFinite(value)) {
+        throw new Error(`Invalid crop ${edge} ${value}. Expected a finite number`);
     }
     return Math.round(value * 1000);
 };
