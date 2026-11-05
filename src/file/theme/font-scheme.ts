@@ -29,6 +29,8 @@ export type IThemeFontOptions = {
      * for the others
      */
     readonly scripts?: Readonly<Record<string, string>>;
+    /** Whether `scripts` are the only fonts for scripts, without Office's for the others */
+    readonly onlyGivenScripts?: boolean;
 };
 
 /**
@@ -146,7 +148,7 @@ const themeScriptFonts = (
 
 const createFontCollection = (use: keyof IThemeFontsOptions, fonts: IThemeFontsOptions): XmlComponent => {
     const font = fonts[use];
-    const { eastAsia = "", complexScript = "", scripts } = typeof font === "object" ? font : {};
+    const { eastAsia = "", complexScript = "", scripts, onlyGivenScripts } = typeof font === "object" ? font : {};
     const latin = themeLatinFont(use, fonts);
     const office = OFFICE_FONTS[use];
     return new BuilderElement({
@@ -156,7 +158,7 @@ const createFontCollection = (use: keyof IThemeFontsOptions, fonts: IThemeFontsO
             createTextFont("a:latin", latin, latin === office.latin ? office.panose : undefined),
             createTextFont("a:ea", eastAsia),
             createTextFont("a:cs", complexScript),
-            ...themeScriptFonts(use, scripts).map(
+            ...(onlyGivenScripts ? Object.entries(scripts ?? {}) : themeScriptFonts(use, scripts)).map(
                 ([script, typeface]) =>
                     new BuilderElement<{ readonly script: string; readonly typeface: string }>({
                         name: "a:font",

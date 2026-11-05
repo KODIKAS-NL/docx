@@ -20,6 +20,15 @@ const elements = (theme: Theme): { readonly colors: Tree; readonly fonts: Tree; 
 const fontCollection = (fonts: Tree, name: "a:majorFont" | "a:minorFont"): Tree => fonts.find((child) => name in child)![name] as Tree;
 
 describe("Theme", () => {
+    it("should have only the scripts given with onlyGivenScripts", () => {
+        const xml = JSON.stringify(
+            new Formatter().format(new Theme({ fonts: { body: { scripts: { Jpan: "Meiryo" }, onlyGivenScripts: true } } })),
+        );
+        expect(xml).to.include('"script":"Jpan","typeface":"Meiryo"');
+        // the headings keep Office's, the body has no other script
+        expect(xml.match(/"script":"Hang"/g)).to.have.length(1);
+    });
+
     it("should write Office's theme when given no options", () => {
         const theme = new Theme();
         const tree = format(theme);
