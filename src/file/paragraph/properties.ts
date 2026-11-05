@@ -150,6 +150,16 @@ export type IParagraphPropertiesOptionsBase = {
      */
     readonly autoSpaceEastAsianText?: boolean;
     /**
+     * Whether inter-character spacing is adjusted between regions of Latin text and regions of East Asian text (`w:autoSpaceDE`).
+     * Reference: ECMA-376 § 17.3.1.2.
+     */
+    readonly autoSpaceLatinText?: boolean;
+    /**
+     * Whether the East Asian line breaking rules (kinsoku) apply to the paragraph (`w:kinsoku`).
+     * Reference: ECMA-376 § 17.3.1.16.
+     */
+    readonly kinsoku?: boolean;
+    /**
      * Run properties to apply to all runs in the paragraph.
      * Reference: ECMA-376, 3rd Edition (June, 2011), Fundamentals and Markup Language Reference § 17.3.1.29.
      */
@@ -431,14 +441,6 @@ export class ParagraphProperties extends IgnoreIfEmptyXmlComponent {
             this.push(createShading(options.shading));
         }
 
-        if (options.wordWrap) {
-            this.push(createWordWrap());
-        }
-
-        if (options.overflowPunctuation) {
-            this.push(new OnOffElement("w:overflowPunct", options.overflowPunctuation));
-        }
-
         /**
          * FIX: Multitab support for Libre Writer
          * Ensure there is only one w:tabs tag with multiple w:tab
@@ -455,6 +457,26 @@ export class ParagraphProperties extends IgnoreIfEmptyXmlComponent {
         /**
          *  FIX - END
          */
+
+        if (options.kinsoku !== undefined) {
+            this.push(new OnOffElement("w:kinsoku", options.kinsoku));
+        }
+
+        if (options.wordWrap) {
+            this.push(createWordWrap());
+        }
+
+        if (options.overflowPunctuation !== undefined) {
+            this.push(new OnOffElement("w:overflowPunct", options.overflowPunctuation));
+        }
+
+        if (options.autoSpaceLatinText !== undefined) {
+            this.push(new OnOffElement("w:autoSpaceDE", options.autoSpaceLatinText));
+        }
+
+        if (options.autoSpaceEastAsianText !== undefined) {
+            this.push(new OnOffElement("w:autoSpaceDN", options.autoSpaceEastAsianText));
+        }
 
         if (options.bidirectional !== undefined) {
             this.push(new OnOffElement("w:bidi", options.bidirectional));
@@ -482,10 +504,6 @@ export class ParagraphProperties extends IgnoreIfEmptyXmlComponent {
 
         if (options.suppressLineNumbers !== undefined) {
             this.push(new OnOffElement("w:suppressLineNumbers", options.suppressLineNumbers));
-        }
-
-        if (options.autoSpaceEastAsianText !== undefined) {
-            this.push(new OnOffElement("w:autoSpaceDN", options.autoSpaceEastAsianText));
         }
 
         if (options.run) {

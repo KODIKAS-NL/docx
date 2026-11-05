@@ -12,6 +12,7 @@ import {
     type DocPropertiesOptions,
     Drawing,
     type DrawingLinkOptions,
+    type EffectExtentAttributes,
     type IFloating,
     type IMediaDataTransformation,
     type IMediaTransformation,
@@ -63,6 +64,8 @@ export type IShapeGroupOptions = DrawingLinkOptions & {
     readonly childSpace?: ShapeChildSpace;
     /** Floats the group on the page instead of placing it inline with text */
     readonly floating?: IFloating;
+    /** How far, in EMUs, the group reaches past each side of its box (`wp:effectExtent`). By default it is worked out from its shapes */
+    readonly effectExtent?: EffectExtentAttributes;
     /** Name, description and title used by screen readers */
     readonly altText?: DocPropertiesOptions;
     /** Formatting of the run the group is in, such as `position` to raise or lower it from the text's baseline */
@@ -135,12 +138,14 @@ export class ShapeGroupRun extends Run {
                 {
                     ...drawingOptions,
                     // Lines, effects and rotated shapes can reach past the group's box
-                    effectExtent: getGroupEffectExtent(layout, childOffset, childExtent, {
-                        width: groupTransformation.emus.x,
-                        height: groupTransformation.emus.y,
-                        rotation: options.transformation?.rotation,
-                        flip: options.transformation?.flip,
-                    }),
+                    effectExtent:
+                        options.effectExtent ??
+                        getGroupEffectExtent(layout, childOffset, childExtent, {
+                            width: groupTransformation.emus.x,
+                            height: groupTransformation.emus.y,
+                            rotation: options.transformation?.rotation,
+                            flip: options.transformation?.flip,
+                        }),
                 },
             );
         };

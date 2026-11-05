@@ -68,6 +68,8 @@ export type ITablePropertiesOptionsBase = {
     readonly indent?: ITableWidthProperties;
     readonly layout?: (typeof TableLayoutType)[keyof typeof TableLayoutType];
     readonly borders?: ITableBordersOptions;
+    /** Only the sides of `borders` that are given are written, with a style or without (see the table's option) */
+    readonly exactBorders?: boolean;
     readonly float?: ITableFloatOptions;
     readonly shading?: IShadingAttributesProperties;
     readonly style?: string;
@@ -170,7 +172,7 @@ export class TableProperties extends IgnoreIfEmptyXmlComponent {
 
         if (options.borders) {
             // A table with a style takes the sides it isn't given from the style
-            this.root.push(new TableBorders(options.borders, { fillMissingSides: !options.style && !inStyle }));
+            this.root.push(new TableBorders(options.borders, { fillMissingSides: !options.exactBorders && !options.style && !inStyle }));
         }
 
         if (options.shading) {

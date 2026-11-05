@@ -299,6 +299,27 @@ describe("Table", () => {
             });
         });
 
+        it("should write only the borders it is given with exactBorders, without a style too", () => {
+            const tree = new Formatter().format(
+                new Table({
+                    rows: [new TableRow({ children: [new TableCell({ children: [new Paragraph("a")] })] })],
+                    borders: { top: { style: BorderStyle.SINGLE, size: 4, color: "000000" } },
+                    exactBorders: true,
+                }),
+            );
+            const borders = JSON.stringify(tree);
+            expect(borders).toContain('"w:tblBorders"');
+            expect(borders).not.toContain('"w:insideH"');
+            expect(borders).not.toContain('"w:bottom"');
+        });
+
+        it("should have no table borders with exactBorders and none given", () => {
+            const tree = new Formatter().format(
+                new Table({ rows: [new TableRow({ children: [new TableCell({ children: [new Paragraph("a")] })] })], exactBorders: true }),
+            );
+            expect(JSON.stringify(tree)).not.toContain('"w:tblBorders"');
+        });
+
         it("should give a table without a style thin single lines on the sides its borders don't give", () => {
             const table = new Table({
                 rows: [new TableRow({ children: [new TableCell({ children: [new Paragraph("hello")] })] })],

@@ -463,6 +463,13 @@ describe("Run", () => {
         });
     });
 
+    describe("#complexScript", () => {
+        it.each([true, false])("should write w:cs for %s", (complexScript) => {
+            const tree = new Formatter().format(new Run({ complexScript }));
+            expect(tree).to.deep.equal({ "w:r": [{ "w:rPr": [{ "w:cs": complexScript ? {} : { _attr: { "w:val": false } } }] }] });
+        });
+    });
+
     describe("#page numbers", () => {
         const text = (value: string) => ({ "w:t": [{ _attr: { "xml:space": "preserve" } }, value] });
         const fieldChar = (type: string) => ({ "w:fldChar": { _attr: { "w:fldCharType": type } } });

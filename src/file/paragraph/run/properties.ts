@@ -203,6 +203,8 @@ export type IRunStylePropertiesOptions = {
     readonly size?: number | PositiveUniversalMeasure;
     readonly sizeComplexScript?: boolean | number | PositiveUniversalMeasure;
     readonly rightToLeft?: boolean;
+    /** Whether the run's characters are complex script (`w:cs`), whatever their code points */
+    readonly complexScript?: boolean;
     readonly smallCaps?: boolean;
     readonly allCaps?: boolean;
     readonly strike?: boolean;
@@ -436,6 +438,10 @@ export class RunProperties extends IgnoreIfEmptyXmlComponent {
 
         if (options.rightToLeft !== undefined) {
             this.push(new OnOffElement("w:rtl", options.rightToLeft));
+        }
+
+        if (options.complexScript !== undefined) {
+            this.push(new OnOffElement("w:cs", options.complexScript));
         }
 
         if (options.emphasisMark) {

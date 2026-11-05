@@ -60,6 +60,11 @@ export type ITableOptions = {
      * sides given are written, and the rest come from the style.
      */
     readonly borders?: ITableBordersOptions;
+    /**
+     * Whether only the sides of `borders` that are given are written, with a `style` or without: a table with no
+     * borders of its own then has none, and one with some has those. Default is false
+     */
+    readonly exactBorders?: boolean;
     readonly alignment?: (typeof AlignmentType)[keyof typeof AlignmentType];
     readonly visuallyRightToLeft?: boolean;
     readonly tableLook?: ITableLookOptions;
@@ -127,6 +132,7 @@ export class Table extends FileChild {
         layout,
         style,
         borders,
+        exactBorders,
         alignment,
         visuallyRightToLeft,
         tableLook,
@@ -184,7 +190,8 @@ export class Table extends FileChild {
         this.root.push(
             new TableProperties({
                 // Without a style, a table has thin single borders unless it is given others; with one, it has the style's
-                borders: style ? borders : (borders ?? {}),
+                borders: style || exactBorders ? borders : (borders ?? {}),
+                exactBorders,
                 width: this.width,
                 indent,
                 float,

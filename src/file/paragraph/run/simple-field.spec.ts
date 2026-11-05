@@ -87,6 +87,23 @@ describe("SimpleField", () => {
     });
 });
 
+describe("SimpleField run", () => {
+    it("gives the cached value the run properties", () => {
+        const tree = new Formatter().format(new SimpleField("FILENAME", "a.docx", { run: { size: 20 } }));
+        expect(tree).to.deep.equal({
+            "w:fldSimple": [
+                { _attr: { "w:instr": "FILENAME" } },
+                {
+                    "w:r": [
+                        { "w:rPr": [{ "w:sz": { _attr: { "w:val": 20 } } }, { "w:szCs": { _attr: { "w:val": 20 } } }] },
+                        { "w:t": [{ _attr: { "xml:space": "preserve" } }, "a.docx"] },
+                    ],
+                },
+            ],
+        });
+    });
+});
+
 describe("SimpleMailMergeField", () => {
     describe("#constructor()", () => {
         it("creates a simple field", () => {

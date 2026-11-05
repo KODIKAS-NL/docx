@@ -205,6 +205,7 @@ export class File {
     private readonly commentsIds?: CommentsIds;
     private readonly fontWrapper: FontWrapper;
     private readonly theme: Theme;
+    private readonly hasTheme: boolean;
     private readonly omitUnusedNotes: boolean;
     private readonly packageParts: PackageParts;
     private readonly macros?: FileMacros;
@@ -252,7 +253,7 @@ export class File {
         this.appProperties = new AppProperties();
         this.footnotesWrapper = new FootnotesWrapper();
         this.endnotesWrapper = new EndnotesWrapper();
-        this.contentTypes = new ContentTypes({ macros: this.macros !== undefined });
+        this.contentTypes = new ContentTypes({ macros: this.macros !== undefined, theme: options.theme !== false });
         if (this.macros?.events !== undefined) {
             this.contentTypes.addOverride("application/vnd.ms-word.vbaData+xml", "/word/vbaData.xml");
         }
@@ -364,15 +365,18 @@ export class File {
 
         this.fontWrapper = new FontWrapper(options.fonts ?? [], options.fontDescriptions);
 
-        this.theme = new Theme(options.theme);
+        this.hasTheme = options.theme !== false;
+        this.theme = new Theme(options.theme === false ? undefined : options.theme);
         this.omitUnusedNotes = options.omitUnusedNotes ?? false;
         // After the headers and footers, so their relationships keep the ids they had before documents had a theme
-        this.documentWrapper.Relationships.addRelationship(
-            // eslint-disable-next-line functional/immutable-data
-            this.currentRelationshipId++,
-            "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
-            "theme/theme1.xml",
-        );
+        if (this.hasTheme) {
+            this.documentWrapper.Relationships.addRelationship(
+                // eslint-disable-next-line functional/immutable-data
+                this.currentRelationshipId++,
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
+                "theme/theme1.xml",
+            );
+        }
         if (this.macros !== undefined) {
             this.documentWrapper.Relationships.addRelationship(
                 // eslint-disable-next-line functional/immutable-data
@@ -627,6 +631,11 @@ export class File {
             return [];
         }
         return [...(this.footnotesWrapper.View.Used ? [] : ["footnotes.xml"]), ...(this.endnotesWrapper.View.Used ? [] : ["endnotes.xml"])];
+    }
+
+    /** Whether the document has a theme part (word/theme/theme1.xml): not when its `theme` option is false. */
+    public get HasTheme(): boolean {
+        return this.hasTheme;
     }
 
     /** The document's theme (word/theme/theme1.xml). */

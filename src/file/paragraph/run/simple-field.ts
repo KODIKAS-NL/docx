@@ -13,6 +13,7 @@ import { SpaceType } from "@file/shared";
 import { XmlAttributeComponent, XmlComponent } from "@file/xml-components";
 
 import { createBegin, createEnd } from "./field";
+import type { IRunOptions } from "./run";
 import { TextAttributes } from "./text-attributes";
 import { TextRun } from "./text-run";
 
@@ -47,6 +48,8 @@ class FldSimpleAttrs extends XmlAttributeComponent<{ readonly instr: string; rea
 export type ISimpleFieldOptions = {
     /** Locks the field so Word keeps the cached value when fields are updated. Not locked by default. */
     readonly locked?: boolean;
+    /** The run properties of the cached value */
+    readonly run?: IRunOptions;
 };
 
 /**
@@ -106,7 +109,7 @@ export class SimpleField extends XmlComponent {
         }
         this.root.push(new FldSimpleAttrs({ instr: instruction, fldLock: options.locked ? true : undefined }));
         if (cachedValue !== undefined) {
-            this.root.push(new TextRun(cachedValue));
+            this.root.push(new TextRun(options.run ? { ...options.run, text: cachedValue } : cachedValue));
         }
     }
 }

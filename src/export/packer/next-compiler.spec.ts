@@ -83,6 +83,16 @@ describe("Compiler", () => {
             expect(fileNames).to.include("_rels/.rels");
         });
 
+        it("should not pack a theme part, or refer to one, with a theme of false", () => {
+            const zipFile = compile(new File({ sections: [], theme: false }));
+            const relationships = new TextDecoder().decode(zipFile.get("word/_rels/document.xml.rels")!);
+            const types = new TextDecoder().decode(zipFile.get("[Content_Types].xml")!);
+
+            expect([...zipFile.keys()]).to.not.include("word/theme/theme1.xml");
+            expect(relationships).to.not.include("theme");
+            expect(types).to.not.include("theme");
+        });
+
         it("should not pack a comments part, or refer to one, when there are no comments", () => {
             const zipFile = compile(new File({ sections: [], comments: { children: [] } }));
             const fileNames = [...zipFile.keys()];

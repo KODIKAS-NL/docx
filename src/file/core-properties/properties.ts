@@ -127,10 +127,10 @@ export type IPropertiesOptions = {
     readonly omitUnusedNotes?: boolean;
     readonly hyphenation?: IHyphenationOptions;
     /**
-     * The document's theme: its colors, and its fonts for headings and body text. Every document has a theme, Office's
-     * from Office 2016 to 2021 unless the options change it
+     * The document's theme: its colors, and its fonts for headings and body text. A document has a theme, Office's
+     * from Office 2016 to 2021 unless the options change it, or `false` leaves the theme part out
      */
-    readonly theme?: IThemeOptions;
+    readonly theme?: IThemeOptions | false;
     /**
      * Works out the page each bookmark is on, so the page numbers of the document's tables of contents and page
      * references are written with it, rather than left blank until Word updates them. Give it `estimatePageNumbers`

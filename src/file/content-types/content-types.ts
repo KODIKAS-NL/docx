@@ -33,8 +33,9 @@ export class ContentTypes extends XmlComponent {
     /**
      * @param options.macros - Whether the document has VBA macros, which makes its main part a macro-enabled document
      * and adds the VBA project (word/vbaProject.bin)
+     * @param options.theme - Whether the document has a theme part (word/theme/theme1.xml). Default is true
      */
-    public constructor({ macros = false }: { readonly macros?: boolean } = {}) {
+    public constructor({ macros = false, theme = true }: { readonly macros?: boolean; readonly theme?: boolean } = {}) {
         super("Types");
 
         this.root.push(
@@ -77,7 +78,9 @@ export class ContentTypes extends XmlComponent {
         this.root.push(
             createOverride("application/vnd.openxmlformats-officedocument.wordprocessingml.fontTable+xml", "/word/fontTable.xml"),
         );
-        this.root.push(createOverride("application/vnd.openxmlformats-officedocument.theme+xml", "/word/theme/theme1.xml"));
+        if (theme) {
+            this.root.push(createOverride("application/vnd.openxmlformats-officedocument.theme+xml", "/word/theme/theme1.xml"));
+        }
 
         if (macros) {
             this.root.push(createOverride("application/vnd.ms-office.vbaProject", "/word/vbaProject.bin"));

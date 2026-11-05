@@ -83,7 +83,7 @@ type IXmlifyedFileMapping = {
     /** Font table relationships (word/_rels/fontTable.xml.rels) */
     readonly FontTableRelationships?: IXmlifyedFile;
     /** Theme (word/theme/theme1.xml) */
-    readonly Theme: IXmlifyedFile;
+    readonly Theme?: IXmlifyedFile;
     /** Parts added by the document's content, such as charts (word/charts/chart1.xml), and their relationships */
     readonly PackageParts: readonly PackagePartFile[];
     /** The events of the document its macros handle (word/vbaData.xml) */
@@ -738,23 +738,27 @@ export class Compiler {
                     ))(),
                 path: "word/_rels/fontTable.xml.rels",
             },
-            Theme: {
-                data: stringifyXmlable(
-                    this.formatter.format(file.Theme, {
-                        viewWrapper: file.Document,
-                        file,
-                        stack: [],
-                    }),
-                    {
-                        indent: prettify,
-                        declaration: {
-                            standalone: "yes",
-                            encoding: "UTF-8",
-                        },
-                    },
-                ),
-                path: "word/theme/theme1.xml",
-            },
+            ...(file.HasTheme
+                ? {
+                      Theme: {
+                          data: stringifyXmlable(
+                              this.formatter.format(file.Theme, {
+                                  viewWrapper: file.Document,
+                                  file,
+                                  stack: [],
+                              }),
+                              {
+                                  indent: prettify,
+                                  declaration: {
+                                      standalone: "yes",
+                                      encoding: "UTF-8",
+                                  },
+                              },
+                          ),
+                          path: "word/theme/theme1.xml",
+                      },
+                  }
+                : {}),
             ...(file.Macros?.events
                 ? {
                       MacroEvents: {

@@ -9,6 +9,34 @@ import { ParagraphProperties } from "./properties";
 import { SectionProperties } from "../document/body/section-properties/section-properties";
 import { FontWrapper } from "../fonts/font-wrapper";
 
+describe("ParagraphProperties East Asian options", () => {
+    it.each([
+        ["overflowPunctuation", "w:overflowPunct"],
+        ["autoSpaceLatinText", "w:autoSpaceDE"],
+        ["kinsoku", "w:kinsoku"],
+    ])("writes %s when false", (option, element) => {
+        const tree = new Formatter().format(new ParagraphProperties({ [option]: false } as never));
+        expect(tree).to.deep.equal({ "w:pPr": [{ [element]: { _attr: { "w:val": false } } }] });
+    });
+});
+
+describe("ParagraphProperties order", () => {
+    it("writes the East Asian options after the tabs, in the schema's order", () => {
+        const tree = new Formatter().format(
+            new ParagraphProperties({
+                autoSpaceEastAsianText: false,
+                autoSpaceLatinText: false,
+                overflowPunctuation: false,
+                wordWrap: true,
+                kinsoku: false,
+                tabStops: [{ type: "left", position: 720 }],
+            }),
+        );
+        const names = (tree["w:pPr"] as readonly object[]).map((element) => Object.keys(element)[0]);
+        expect(names).to.deep.equal(["w:tabs", "w:kinsoku", "w:wordWrap", "w:overflowPunct", "w:autoSpaceDE", "w:autoSpaceDN"]);
+    });
+});
+
 describe("ParagraphProperties", () => {
     describe("#constructor()", () => {
         it("creates an initially empty property object", () => {

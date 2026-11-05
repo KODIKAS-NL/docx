@@ -11,6 +11,15 @@ describe("ContentTypes", () => {
         contentTypes = new ContentTypes();
     });
 
+    describe("theme", () => {
+        const theme = (types: ContentTypes) => JSON.stringify(new Formatter().format(types)).includes("theme+xml");
+
+        it("is registered by default and left out without a theme", () => {
+            expect(theme(new ContentTypes())).toBe(true);
+            expect(theme(new ContentTypes({ theme: false }))).toBe(false);
+        });
+    });
+
     describe("#constructor()", () => {
         it("should create default content types", () => {
             const tree = new Formatter().format(contentTypes);

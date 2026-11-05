@@ -32,6 +32,10 @@ const escapeText = (value: string): string =>
  */
 const escapeValue = <T>(value: T): T | string => (typeof value === "string" ? escapeAll(value) : value);
 
+// A line break or tab in an attribute is read as a space unless it is a character reference (XML 1.0 § 3.3.3)
+const escapeAttribute = (value: string): string =>
+    escapeAll(value).replace(/[\t\n\r]/g, (character) => `&#x${character.charCodeAt(0).toString(16).toUpperCase()};`);
+
 /**
  * Options for {@link stringifyXmlable}.
  */
@@ -68,7 +72,7 @@ const resolve = (data: object, indent: string, depth: number): ResolvedElement =
     const addAttributes = (attr: Readonly<Record<string, unknown>>): void => {
         for (const [key, value] of Object.entries(attr)) {
             // eslint-disable-next-line functional/immutable-data
-            attributes.push(`${key}="${String(escapeValue(value))}"`);
+            attributes.push(`${key}="${escapeAttribute(String(value))}"`);
         }
     };
 
@@ -160,7 +164,7 @@ export const stringifyXmlable = (
 
 const stringifyAttributes = (attributes: XmlElement["attributes"]): string =>
     Object.entries(attributes ?? {})
-        .flatMap(([key, value]) => (value === undefined || value === null ? [] : [` ${key}="${escapeAll(String(value))}"`]))
+        .flatMap(([key, value]) => (value === undefined || value === null ? [] : [` ${key}="${escapeAttribute(String(value))}"`]))
         .join("");
 
 const stringifyNode = (node: XmlElement): string => {

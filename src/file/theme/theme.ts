@@ -36,7 +36,8 @@ export type IThemeOptions = {
 /**
  * Represents the theme of a document, written to `word/theme/theme1.xml`.
  *
- * Every document has one: Office's theme, from Office 2016 to 2021, with the colors and fonts the options give.
+ * A document has one unless its `theme` option is false: Office's theme, from Office 2016 to 2021, with the colors and
+ * fonts the options give.
  *
  * Reference: http://officeopenxml.com/drwTheme.php
  *

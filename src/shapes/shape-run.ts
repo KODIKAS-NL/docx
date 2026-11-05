@@ -8,7 +8,7 @@
  *
  * @module
  */
-import { Drawing, type IRunPropertiesOptions, Run, createTransformation } from "docx";
+import { Drawing, type EffectExtentAttributes, type IRunPropertiesOptions, Run, createTransformation } from "docx";
 
 import { SHAPE_URI } from "./drawing/shape-drawing-child";
 import { createStyledDrawing } from "./drawing/styled-drawing";
@@ -97,6 +97,11 @@ export type IShapeOptions = WithPresetShape<
          */
         readonly floating?: ShapeFloating;
         /**
+         * How far, in EMUs, the drawing reaches past each side of its box (`wp:effectExtent`). By default it is worked out
+         * from the shape's rotation, line, arrowheads and effects
+         */
+        readonly effectExtent?: EffectExtentAttributes;
+        /**
          * The name of a text flow the shape is in: text that flows from one shape to the next, such as an article that
          * continues on another page. The first shape of the flow in the document holds the text, from its `text` and
          * `children`, and the text that doesn't fit flows on into the next shape of the flow, and so on
@@ -162,7 +167,7 @@ export class ShapeRun extends Run {
                                 transformation: drawingTransformation,
                             }),
                         },
-                        { ...drawingOptions, effectExtent: getShapeEffectExtent({ ...options, transformation }) },
+                        { ...drawingOptions, effectExtent: options.effectExtent ?? getShapeEffectExtent({ ...options, transformation }) },
                     ),
                     options.floating,
                     options.transformation,

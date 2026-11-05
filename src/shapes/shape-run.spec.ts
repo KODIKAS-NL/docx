@@ -24,6 +24,19 @@ describe("ShapeRun", () => {
         vi.restoreAllMocks();
     });
 
+    it("should write the effect extent it is given instead of working it out", () => {
+        const tree = new Formatter().format(
+            new ShapeRun({
+                type: "rectangle",
+                transformation: { width: 200, height: 4 },
+                line: { color: "000000", width: 10 },
+                effectExtent: { top: 1, right: 2, bottom: 3, left: 4 },
+            }),
+        );
+
+        expect(JSON.stringify(tree)).toContain('"wp:effectExtent":{"_attr":{"t":1,"r":2,"b":3,"l":4}}');
+    });
+
     it("should draw an inline black bar", () => {
         const tree = new Formatter().format(
             new ShapeRun({ type: "rectangle", transformation: { width: 200, height: 4 }, fill: "000000", line: "none" }),

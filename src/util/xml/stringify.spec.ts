@@ -36,6 +36,10 @@ describe("stringifyXmlable", () => {
         );
     });
 
+    it("should keep line breaks and tabs in attributes as character references", () => {
+        expect(stringifyXmlable({ a: { _attr: { b: "one\n\ttwo\r" } } })).to.equal('<a b="one&#xA;&#x9;two&#xD;"/>');
+    });
+
     it("should leave out the characters that XML 1.0 does not allow", () => {
         expect(stringifyXmlable({ "w:t": "a\x01b\x0Bc\x1Fd" })).to.equal("<w:t>abcd</w:t>");
         expect(stringifyXmlable({ a: { _attr: { b: "x\x00y\x08z" } } })).to.equal('<a b="xyz"/>');
