@@ -256,7 +256,10 @@ export class Numbering extends XmlComponent {
 
         for (const con of options.config) {
             // eslint-disable-next-line functional/immutable-data
-            this.abstractNumberingMap.set(con.reference, new AbstractNumbering(this.abstractNumUniqueNumericId(), con.levels, con.multiLevelType));
+            this.abstractNumberingMap.set(
+                con.reference,
+                new AbstractNumbering(this.abstractNumUniqueNumericId(), con.levels, con.multiLevelType),
+            );
             // eslint-disable-next-line functional/immutable-data
             this.referenceConfigMap.set(con.reference, con.levels);
             if (con.instances) {
@@ -363,10 +366,10 @@ export class Numbering extends XmlComponent {
             // an instance with start overrides of its own gets those (a restarted list keeps starting over)
             overrideLevels:
                 (restartedListId === undefined ? this.referenceInstancesMap.get(reference)?.[instance] : undefined)?.map(
-                    ({ level, start, definition }) => ({
+                    ({ level, start, definition: ownLevel }) => ({
                         num: level,
                         start: start === undefined ? undefined : decimalNumber(start),
-                        level: definition,
+                        level: ownLevel,
                     }),
                 ) ??
                 referenceConfigLevels.map(({ level, start = 1 }) => ({

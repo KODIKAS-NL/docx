@@ -87,7 +87,7 @@ export class AbstractNumbering extends XmlComponent {
      * @param levelOptions - Array of level definitions (up to 9 levels)
      * @param multiLevelType - How the definition's levels are used, as Word's interface treats them
      */
-    public constructor(id: number, levelOptions: readonly ILevelsOptions[], multiLevelType = "hybridMultilevel") {
+    public constructor(id: number, levelOptions: readonly ILevelsOptions[], multiLevelType: string = "hybridMultilevel") {
         super("w:abstractNum");
         this.root.push(
             new AbstractNumberingAttributes({

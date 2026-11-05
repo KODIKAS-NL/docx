@@ -43,7 +43,7 @@ import { NonVisualPropertiesAttributes } from "./non-visual-properties-attribute
  * ```
  */
 export class NonVisualProperties extends XmlComponent {
-    public constructor(name = "") {
+    public constructor(name: string = "") {
         super("pic:cNvPr");
 
         this.root.push(

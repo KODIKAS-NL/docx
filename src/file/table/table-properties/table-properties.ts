@@ -124,7 +124,7 @@ export class TableProperties extends IgnoreIfEmptyXmlComponent {
      * @param inStyle - the properties of a table style, whose borders are the sides given only (a table with no style gets the
      * sides it isn't given)
      */
-    public constructor(options: ITablePropertiesOptions, inStyle = false) {
+    public constructor(options: ITablePropertiesOptions, inStyle: boolean = false) {
         super("w:tblPr", options.includeIfEmpty);
 
         if (options.style) {

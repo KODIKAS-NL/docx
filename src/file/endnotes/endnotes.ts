@@ -153,9 +153,10 @@ export class Endnotes extends XmlComponent {
         }
         const id = this.highestId + 1;
         this.createEndnote(id, endnote.children, endnote.ownMark);
-        // eslint-disable-next-line functional/immutable-data
+
         // eslint-disable-next-line functional/immutable-data
         this.used = true;
+        // eslint-disable-next-line functional/immutable-data
         this.ownNotes.set(reference, id);
         return id;
     }

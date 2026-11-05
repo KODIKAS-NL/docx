@@ -11,7 +11,7 @@
 import type { IMediaData } from "@file/media";
 import { XmlComponent } from "@file/xml-components";
 
-import { createBlip, type LuminanceOptions } from "./blip";
+import { type LuminanceOptions, createBlip } from "./blip";
 import { type ICropOptions, SourceRectangle } from "./source-rectangle";
 import { Stretch } from "./stretch";
 

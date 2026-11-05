@@ -68,7 +68,10 @@ export type IImageOptions = (RegularImageOptions | SvgMediaOptions) & CoreImageO
 
 export { standardizeData } from "./image-data";
 
-const createImageData = (options: IImageOptions, key: string): Pick<IMediaData, "data" | "fileName" | "pictureName" | "transformation"> => ({
+const createImageData = (
+    options: IImageOptions,
+    key: string,
+): Pick<IMediaData, "data" | "fileName" | "pictureName" | "transformation"> => ({
     data: standardizeData(options.data),
     fileName: key,
     pictureName: options.altText?.pictureName,

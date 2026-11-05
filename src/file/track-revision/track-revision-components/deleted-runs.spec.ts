@@ -15,7 +15,12 @@ describe("DeletedRuns", () => {
             "w:del": [
                 { _attr: { "w:id": 1, "w:author": "Ann", "w:date": "2024-01-01T00:00:00Z" } },
                 { "w:r": [{ "w:delText": [{ _attr: { "xml:space": "preserve" } }, "one"] }] },
-                { "w:r": [{ "w:rPr": [{ "w:b": {} }, { "w:bCs": {} }] }, { "w:delText": [{ _attr: { "xml:space": "preserve" } }, "two"] }] },
+                {
+                    "w:r": [
+                        { "w:rPr": [{ "w:b": {} }, { "w:bCs": {} }] },
+                        { "w:delText": [{ _attr: { "xml:space": "preserve" } }, "two"] },
+                    ],
+                },
             ],
         });
     });
@@ -23,7 +28,9 @@ describe("DeletedRuns", () => {
     it("writes a field's instructions as w:delInstrText", () => {
         const instruction = new BuilderElement({ name: "w:instrText" });
         const run = new TextRun({ children: [instruction as never] });
-        expect(JSON.stringify(tree([run]))).to.include("w:delInstrText").and.not.include('"w:instrText"');
+        expect(JSON.stringify(tree([run])))
+            .to.include("w:delInstrText")
+            .and.not.include('"w:instrText"');
     });
 
     it("leaves out the date when there is none", () => {
@@ -34,7 +41,10 @@ describe("DeletedRuns", () => {
     it("leaves a w:t attribute named like the element alone", () => {
         const element = new BuilderElement({ name: "w:other", attributes: { value: { key: "w:t", value: "1" } } });
         expect(tree([element])).to.deep.include({
-            "w:del": [{ _attr: { "w:id": 1, "w:author": "Ann", "w:date": "2024-01-01T00:00:00Z" } }, { "w:other": { _attr: { "w:t": "1" } } }],
+            "w:del": [
+                { _attr: { "w:id": 1, "w:author": "Ann", "w:date": "2024-01-01T00:00:00Z" } },
+                { "w:other": { _attr: { "w:t": "1" } } },
+            ],
         });
     });
 });

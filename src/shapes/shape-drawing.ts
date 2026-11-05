@@ -96,8 +96,10 @@ export const childSpaceOf = (
     space: ShapeChildSpace | undefined,
 ): { readonly childOffset: Point; readonly childExtent: Point } => {
     if (space) {
-        const childOffset = { x: Math.round(space.left * EMUS_PER_PIXEL), y: Math.round(space.top * EMUS_PER_PIXEL) };
-        return { childOffset, childExtent: { x: Math.round(space.width * EMUS_PER_PIXEL), y: Math.round(space.height * EMUS_PER_PIXEL) } };
+        return {
+            childOffset: { x: Math.round(space.left * EMUS_PER_PIXEL), y: Math.round(space.top * EMUS_PER_PIXEL) },
+            childExtent: { x: Math.round(space.width * EMUS_PER_PIXEL), y: Math.round(space.height * EMUS_PER_PIXEL) },
+        };
     }
     const childOffset = { x: Math.round(box.left), y: Math.round(box.top) };
     return { childOffset, childExtent: { x: Math.round(box.right) - childOffset.x, y: Math.round(box.bottom) - childOffset.y } };
