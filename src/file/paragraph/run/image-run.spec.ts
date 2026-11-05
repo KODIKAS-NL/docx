@@ -1340,6 +1340,13 @@ describe("ImageRun", () => {
             ]);
         });
 
+        it("should write the picture's own name next to the drawing's", () => {
+            const { tree } = format(new ImageRun({ ...image, altText: { name: "Drawing", pictureName: "A puppy" } }));
+            const xml = JSON.stringify(tree);
+            expect(xml).to.include('"pic:cNvPr":{"_attr":{"id":0,"name":"A puppy","descr":""}}');
+            expect(xml).not.to.include("pictureName");
+        });
+
         it("should name an image whose alt text is only a description, as the XML requires a name", () => {
             const { tree } = format(new ImageRun({ ...image, altText: { description: "A puppy", title: "Rex" } }));
 

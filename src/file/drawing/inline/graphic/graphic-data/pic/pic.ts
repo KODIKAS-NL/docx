@@ -74,7 +74,7 @@ export class Pic extends XmlComponent {
             }),
         );
 
-        this.root.push(new NonVisualPicProperties());
+        this.root.push(new NonVisualPicProperties(mediaData.pictureName));
         this.root.push(new BlipFill(mediaData, crop, luminance));
         this.root.push(new ShapeProperties({ element: "pic", transform, outline, solidFill }));
     }

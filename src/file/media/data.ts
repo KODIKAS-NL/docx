@@ -44,6 +44,8 @@ export type IMediaDataTransformation = {
 type CoreMediaData = {
     /** File name for the media in the package */
     readonly fileName: string;
+    /** The picture's own name (`pic:cNvPr`) */
+    readonly pictureName?: string;
     /** Transformation settings for display */
     readonly transformation: IMediaDataTransformation;
     /** Raw image data as Buffer, Uint8Array, or ArrayBuffer */

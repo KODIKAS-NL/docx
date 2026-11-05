@@ -37,6 +37,8 @@ export type DocPropertiesOptions = {
     /** Title of the drawing element */
     readonly title?: string;
     readonly id?: string;
+    /** The name of the picture itself, written in `pic:cNvPr`, next to the drawing's. Default is an empty name */
+    readonly pictureName?: string;
 };
 
 /**
