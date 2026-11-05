@@ -12,6 +12,12 @@ import { DefaultStylesFactory } from "./factory";
 import { Styles } from "./styles";
 
 describe("Styles", () => {
+    it("should leave out w:rPrDefault when the run defaults are null", () => {
+        const tree = new Formatter().format(new DocumentDefaults({ run: null, paragraph: { spacing: { after: 10 } } }));
+        expect(JSON.stringify(tree)).not.to.include("w:rPrDefault");
+        expect(JSON.stringify(tree)).to.include("w:pPrDefault");
+    });
+
     describe("#createParagraphStyle", () => {
         it("should create a new paragraph style and push it onto this collection", () => {
             const styles = new Styles({

@@ -21,8 +21,8 @@ import { RunPropertiesDefaults } from "./run-properties";
 export type IDocumentDefaultsOptions = {
     /** Default paragraph properties applied to all paragraphs */
     readonly paragraph?: IParagraphStylePropertiesOptions;
-    /** Default run properties applied to all text runs */
-    readonly run?: IRunStylePropertiesOptions;
+    /** Default run properties applied to all text runs; `null` leaves out `w:rPrDefault`, which Word treats otherwise than an empty one */
+    readonly run?: IRunStylePropertiesOptions | null;
 };
 
 /**
@@ -58,16 +58,16 @@ export type IDocumentDefaultsOptions = {
  * ```
  */
 export class DocumentDefaults extends XmlComponent {
-    private readonly runPropertiesDefaults: RunPropertiesDefaults;
     private readonly paragraphPropertiesDefaults: ParagraphPropertiesDefaults;
 
     public constructor(options: IDocumentDefaultsOptions) {
         super("w:docDefaults");
 
-        this.runPropertiesDefaults = new RunPropertiesDefaults(options.run);
         this.paragraphPropertiesDefaults = new ParagraphPropertiesDefaults(options.paragraph);
 
-        this.root.push(this.runPropertiesDefaults);
+        if (options.run !== null) {
+            this.root.push(new RunPropertiesDefaults(options.run));
+        }
         this.root.push(this.paragraphPropertiesDefaults);
     }
 }
