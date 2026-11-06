@@ -44,7 +44,7 @@ export const createTransformation = (options: IMediaTransformation): IMediaDataT
         y: Math.round(options.height * 9525),
     },
     flip: options.flip,
-    rotation: options.rotation ? options.rotation * 60000 : undefined,
+    rotation: options.rotation ? Math.round(options.rotation * 60000) : undefined,
 });
 
 /**

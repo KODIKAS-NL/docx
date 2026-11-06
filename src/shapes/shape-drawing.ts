@@ -1571,7 +1571,7 @@ const toMediaData = (child: LaidOutChild, shift: Point): ShapeDrawingChildMediaD
         pixels: { x: Math.round(width / EMUS_PER_PIXEL), y: Math.round(height / EMUS_PER_PIXEL) },
         emus: { x: width, y: height },
         flip: child.flip,
-        rotation: child.rotation ? child.rotation * 60000 : undefined,
+        rotation: child.rotation ? Math.round(child.rotation * 60000) : undefined,
     };
     switch (child.type) {
         case "wps":

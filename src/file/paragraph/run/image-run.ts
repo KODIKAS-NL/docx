@@ -85,7 +85,7 @@ const createImageData = (
             y: Math.round(options.transformation.height * 9525),
         },
         flip: options.transformation.flip,
-        rotation: options.transformation.rotation ? options.transformation.rotation * 60000 : undefined,
+        rotation: options.transformation.rotation ? Math.round(options.transformation.rotation * 60000) : undefined,
     },
 });
 
