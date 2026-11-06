@@ -6,6 +6,20 @@ import { HorizontalPositionAlign, VerticalPositionAlign } from "@file/shared";
 import { FrameAnchorType, createFrameProperties } from "./frame-properties";
 
 describe("createFrameProperties", () => {
+    it("should write an alignment on one axis and a coordinate on the other", () => {
+        const tree = new Formatter().format(
+            createFrameProperties({
+                type: "alignment",
+                alignment: { x: HorizontalPositionAlign.CENTER },
+                position: { y: 3000 },
+                anchor: { horizontal: FrameAnchorType.MARGIN, vertical: FrameAnchorType.TEXT },
+            }),
+        );
+        expect(tree).to.deep.equal({
+            "w:framePr": { _attr: { "w:hAnchor": "margin", "w:vAnchor": "text", "w:xAlign": "center", "w:y": 3000 } },
+        });
+    });
+
     it("should create", () => {
         const currentFrameProperties = createFrameProperties({
             type: "absolute",

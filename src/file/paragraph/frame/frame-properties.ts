@@ -138,12 +138,17 @@ export type IXYFrameOptions = {
 export type IAlignmentFrameOptions = {
     /** Must be "alignment" for alignment-based positioning */
     readonly type: "alignment";
-    /** Horizontal and vertical alignment values */
+    /** Horizontal and vertical alignment values; an axis without one can have a coordinate in `position` */
     readonly alignment: {
         /** Horizontal alignment relative to the anchor */
-        readonly x: (typeof HorizontalPositionAlign)[keyof typeof HorizontalPositionAlign];
+        readonly x?: (typeof HorizontalPositionAlign)[keyof typeof HorizontalPositionAlign];
         /** Vertical alignment relative to the anchor */
-        readonly y: (typeof VerticalPositionAlign)[keyof typeof VerticalPositionAlign];
+        readonly y?: (typeof VerticalPositionAlign)[keyof typeof VerticalPositionAlign];
+    };
+    /** The coordinate, in twips, of an axis that isn't aligned */
+    readonly position?: {
+        readonly x?: number;
+        readonly y?: number;
     };
 } & IBaseFrameOptions;
 
@@ -301,11 +306,11 @@ export const createFrameProperties = (options: IFrameOptions): XmlComponent =>
             },
             x: {
                 key: "w:x",
-                value: (options as IXYFrameOptions).position ? (options as IXYFrameOptions).position.x : undefined,
+                value: options.position?.x,
             },
             y: {
                 key: "w:y",
-                value: (options as IXYFrameOptions).position ? (options as IXYFrameOptions).position.y : undefined,
+                value: options.position?.y,
             },
             anchorHorizontal: {
                 key: "w:hAnchor",
