@@ -14,7 +14,14 @@ import type { SectionProperties } from "@file/document/body/section-properties/s
 import { listKey } from "@file/numbering/list-key";
 import type { NumberingDefinition } from "@file/numbering/numbering";
 import { ChangeAttributes, type IChangedAttributesProperties } from "@file/track-revision/track-revision";
-import { type IContext, type IXmlableObject, IgnoreIfEmptyXmlComponent, OnOffElement, XmlComponent } from "@file/xml-components";
+import {
+    BuilderElement,
+    type IContext,
+    type IXmlableObject,
+    IgnoreIfEmptyXmlComponent,
+    OnOffElement,
+    XmlComponent,
+} from "@file/xml-components";
 import { uniqueNumericIdCreator } from "@util/convenience-functions";
 
 import { type IParagraphRunOptions, ParagraphRunProperties } from ".";
@@ -62,6 +69,8 @@ export type ILevelParagraphStylePropertiesOptions = {
     readonly keepLines?: boolean;
     /** Outline level for table of contents and document outline (0-9) */
     readonly outlineLevel?: number;
+    /** How the characters of a line of different sizes align (`w:textAlignment`). */
+    readonly textAlignment?: "auto" | "baseline" | "bottom" | "center" | "top";
 };
 
 /**
@@ -496,6 +505,10 @@ export class ParagraphProperties extends IgnoreIfEmptyXmlComponent {
 
         if (options.alignment) {
             this.push(createAlignment((options.bidirectional && RIGHT_TO_LEFT_ALIGNMENTS[options.alignment]) || options.alignment));
+        }
+
+        if (options.textAlignment !== undefined) {
+            this.push(new BuilderElement({ name: "w:textAlignment", attributes: { val: { key: "w:val", value: options.textAlignment } } }));
         }
 
         if (options.outlineLevel !== undefined) {
