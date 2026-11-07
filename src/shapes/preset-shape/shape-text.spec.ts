@@ -17,6 +17,13 @@ describe("createShapeTextProperties", () => {
         expect(anchor("bottom")).to.equal("b");
     });
 
+    it("should keep the text upright only when asked", () => {
+        expect(new Formatter().format(createShapeTextProperties({ upright: true }))).to.deep.equal({
+            "wps:bodyPr": { _attr: { upright: true } },
+        });
+        expect(new Formatter().format(createShapeTextProperties({ upright: false }))).to.deep.equal({ "wps:bodyPr": { _attr: {} } });
+    });
+
     it("should write margins in EMUs from points", () => {
         const tree = new Formatter().format(createShapeTextProperties({ margins: { top: 3.6, right: 0, bottom: 1, left: 7.2 } }));
         expect(tree).to.deep.equal({ "wps:bodyPr": { _attr: { lIns: 91440, tIns: 45720, rIns: 0, bIns: 12700 } } });

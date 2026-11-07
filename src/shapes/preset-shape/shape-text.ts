@@ -133,6 +133,8 @@ export type ShapeTextOptions = {
     };
     /** Bends or stretches the text to a shape, like WordArt */
     readonly warp?: ShapeTextWarp;
+    /** Keeps the text upright when the shape is rotated. Default is `false`: the text turns with the shape */
+    readonly upright?: boolean;
 };
 
 const MAX_TEXT_COLUMNS = 16;
@@ -201,6 +203,8 @@ const marginEmus = (margin: number | undefined, side: string): number | undefine
  *   <xsd:attribute name="fromWordArt" type="xsd:boolean" use="optional"/>
  *   <xsd:attribute name="anchor" type="ST_TextAnchoringType" use="optional"/>
  *   ...
+ *   <xsd:attribute name="upright" type="xsd:boolean" use="optional" default="false"/>
+ *   ...
  * </xsd:complexType>
  * ```
  *
@@ -218,6 +222,7 @@ export const createShapeTextProperties = (options: ShapeTextOptions = {}): XmlCo
         readonly columnSpacing?: number;
         readonly fromWordArt?: boolean;
         readonly anchor?: string;
+        readonly upright?: boolean;
     }>({
         name: "wps:bodyPr",
         attributes: {
@@ -235,6 +240,7 @@ export const createShapeTextProperties = (options: ShapeTextOptions = {}): XmlCo
             // Word draws warped text as WordArt
             fromWordArt: { key: "fromWordArt", value: options.warp ? true : undefined },
             anchor: { key: "anchor", value: options.verticalAlignment && VERTICAL_ALIGNMENT_OOXML_NAMES[options.verticalAlignment] },
+            upright: { key: "upright", value: options.upright || undefined },
         },
         children: [...(options.warp ? [createWarp(options.warp)] : []), ...createAutofit(options)],
     });
