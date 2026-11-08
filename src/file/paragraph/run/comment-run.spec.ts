@@ -64,7 +64,7 @@ describe("Comment", () => {
             const tree = new Formatter().format(component);
             expect(tree).to.deep.equal({
                 "w:comment": [
-                    { _attr: { "w:id": 0, "w:date": "1999-01-01T00:00:00.000Z" } },
+                    { _attr: { "w:id": 0, "w:date": "1999-01-01T00:00:00Z" } },
                     {
                         "w:p": [
                             {
@@ -87,12 +87,17 @@ describe("Comment", () => {
             });
         });
 
+        it("should write no date when the date is null", () => {
+            const tree = new Formatter().format(new Comment({ id: 0, children: [], date: null }));
+            expect(tree).to.deep.equal({ "w:comment": { _attr: { "w:id": 0 } } });
+        });
+
         it("should handle paraId gracefully when comment has no paragraph children", () => {
             const component = new Comment({ id: 0, children: [], date: new Date("1999-01-01T00:00:00.000Z") }, "00000001");
             const tree = new Formatter().format(component);
             // Comment with no paragraphs should serialize without crashing, paraId has nowhere to go
             expect(tree).to.deep.equal({
-                "w:comment": { _attr: { "w:id": 0, "w:date": "1999-01-01T00:00:00.000Z" } },
+                "w:comment": { _attr: { "w:id": 0, "w:date": "1999-01-01T00:00:00Z" } },
             });
         });
 
@@ -121,7 +126,7 @@ describe("Comment", () => {
             const tree = new Formatter().format(component);
             expect(tree).to.deep.equal({
                 "w:comment": [
-                    { _attr: { "w:id": 0, "w:date": "1999-01-01T00:00:00.000Z" } },
+                    { _attr: { "w:id": 0, "w:date": "1999-01-01T00:00:00Z" } },
                     {
                         "w:p": [
                             {
@@ -206,13 +211,13 @@ describe("Comments", () => {
                     },
                     {
                         "w:comment": [
-                            { _attr: { "w:id": 0, "w:date": "1999-01-01T00:00:00.000Z" } },
+                            { _attr: { "w:id": 0, "w:date": "1999-01-01T00:00:00Z" } },
                             { "w:p": [{ "w:r": [{ "w:t": [{ _attr: { "xml:space": "preserve" } }, "test-comment"] }] }] },
                         ],
                     },
                     {
                         "w:comment": [
-                            { _attr: { "w:id": 1, "w:date": "1999-01-01T00:00:00.000Z" } },
+                            { _attr: { "w:id": 1, "w:date": "1999-01-01T00:00:00Z" } },
                             { "w:p": [{ "w:r": [{ "w:t": [{ _attr: { "xml:space": "preserve" } }, "test-comment-2"] }] }] },
                         ],
                     },

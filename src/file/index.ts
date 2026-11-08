@@ -37,6 +37,7 @@ export * from "./textbox";
 export * from "./theme";
 export * from "./document-macros";
 export * from "./document-bibliography";
+export * from "./people";
 // Parts that drawings add to the package when it is written, such as docx/charts' charts
 export * from "./package-part";
 export { type OleObjectRelationshipType, type RelationshipType } from "./relationships/relationship/relationship";

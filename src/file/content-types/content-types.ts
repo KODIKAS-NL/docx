@@ -107,6 +107,13 @@ export class ContentTypes extends XmlComponent {
     }
 
     /**
+     * Registers the people part in the content types.
+     */
+    public addPeople(): void {
+        this.root.push(createOverride("application/vnd.openxmlformats-officedocument.wordprocessingml.people+xml", "/word/people.xml"));
+    }
+
+    /**
      * Registers the commentsIds part in the content types.
      */
     public addCommentsIds(): void {

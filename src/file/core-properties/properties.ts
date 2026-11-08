@@ -11,6 +11,7 @@ import type { IFontDescription } from "@file/fonts/font";
 import type { FontOptions } from "@file/fonts/font-table";
 import type { INoteSeparatorsOptions } from "@file/footnotes/footnotes";
 import type { ICommentsOptions } from "@file/paragraph/run/comment-run";
+import type { IPersonOptions } from "@file/people";
 import type { IHyphenationOptions, ISettingsOptions } from "@file/settings";
 import type { ICompatibilityOptions } from "@file/settings/compatibility";
 import type { IDocumentProtectionOptions } from "@file/settings/document-protection";
@@ -43,6 +44,7 @@ import type { IThemeOptions } from "../theme";
  * @property styles - Document styles configuration
  * @property numbering - Numbering configuration
  * @property comments - Document comments configuration
+ * @property people - The authors of the comments and tracked changes, with who they are (word/people.xml)
  * @property footnotes - Document footnotes
  * @property background - Document background settings
  * @property features - Document features like track changes
@@ -72,6 +74,7 @@ export type IPropertiesOptions = {
     readonly styles?: IStylesOptions;
     readonly numbering?: INumberingOptions;
     readonly comments?: ICommentsOptions;
+    readonly people?: readonly IPersonOptions[];
     readonly footnotes?: Readonly<
         Record<
             string,

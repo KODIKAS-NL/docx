@@ -21,7 +21,7 @@ import { type IContext, type IXmlableObject, XmlAttributeComponent, XmlComponent
  * @property children - Content of the comment (typically paragraphs)
  * @property initials - Initials of the comment author
  * @property author - Name of the comment author
- * @property date - Date and time the comment was created
+ * @property date - Date and time the comment was created: now when not given, none when null
  */
 export type ICommentOptions = {
     /** Unique identifier for the comment */
@@ -33,7 +33,7 @@ export type ICommentOptions = {
     /** Name of the comment author */
     readonly author?: string;
     /** Date and time the comment was created */
-    readonly date?: Date;
+    readonly date?: Date | null;
     /** ID of the parent comment for reply threading */
     readonly parentId?: number;
     /** Whether the comment thread is marked as resolved */
@@ -294,7 +294,8 @@ export class Comment extends XmlComponent {
                 id,
                 initials,
                 author,
-                date: date.toISOString(),
+                // to the second, as Word writes it
+                date: date ? date.toISOString().replace(/\.\d{3}Z$/, "Z") : undefined,
             }),
         );
 
@@ -451,10 +452,11 @@ export class Comments extends XmlComponent {
             }),
         );
 
-        // Generate paraIds for all comments when reply threading is active (parentId)
+        // Generate paraIds for all comments when reply threading is active (parentId or resolved)
         // or any comment carries a durableId. paraIds back both commentsExtended.xml
         // (threading) and commentsIds.xml (durable ids).
-        const hasThreading = children.some((child) => child.parentId !== undefined);
+        // a resolved state is written in commentsExtended.xml too, also of a comment without replies
+        const hasThreading = children.some((child) => child.parentId !== undefined || child.resolved !== undefined);
         const hasDurableIds = children.some((child) => child.durableId !== undefined);
 
         if (hasThreading || hasDurableIds) {
@@ -491,7 +493,7 @@ export class Comments extends XmlComponent {
         return this.relationships;
     }
 
-    /** Thread data for commentsExtended.xml, or undefined when no comments use parentId. */
+    /** Thread data for commentsExtended.xml, or undefined when no comment has a parentId or a resolved state. */
     public get ThreadData(): readonly ICommentThreadData[] | undefined {
         return this.threadData;
     }

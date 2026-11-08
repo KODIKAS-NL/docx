@@ -78,6 +78,8 @@ type IXmlifyedFileMapping = {
     readonly CommentsExtended?: IXmlifyedFile;
     /** Durable comment ids (word/commentsIds.xml) */
     readonly CommentsIds?: IXmlifyedFile;
+    /** The authors of the comments and tracked changes (word/people.xml) */
+    readonly People?: IXmlifyedFile;
     /** Font table (word/fontTable.xml) */
     readonly FontTable?: IXmlifyedFile;
     /** Font table relationships (word/_rels/fontTable.xml.rels) */
@@ -701,6 +703,27 @@ export class Compiler {
                               },
                           ),
                           path: "word/commentsIds.xml",
+                      },
+                  }
+                : {}),
+            ...(file.People
+                ? {
+                      People: {
+                          data: stringifyXmlable(
+                              this.formatter.format(file.People, {
+                                  viewWrapper: file.Document,
+                                  file,
+                                  stack: [],
+                              }),
+                              {
+                                  indent: prettify,
+                                  declaration: {
+                                      standalone: "yes",
+                                      encoding: "UTF-8",
+                                  },
+                              },
+                          ),
+                          path: "word/people.xml",
                       },
                   }
                 : {}),

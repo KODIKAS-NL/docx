@@ -28,6 +28,7 @@ import { Numbering } from "./numbering";
 import { PackageParts } from "./package-part/package-part";
 import { Comments } from "./paragraph/run/comment-run";
 import { CommentsExtended, CommentsIds } from "./paragraph/run/comments-extended";
+import { People } from "./people";
 import { Relationships } from "./relationships";
 import { Settings } from "./settings";
 import { Styles } from "./styles";
@@ -203,6 +204,8 @@ export class File {
     private readonly commentsExtended?: CommentsExtended;
     /** Durable comment id mapping (word/commentsIds.xml). */
     private readonly commentsIds?: CommentsIds;
+    /** The authors of the comments and tracked changes (word/people.xml). */
+    private readonly people?: People;
     private readonly fontWrapper: FontWrapper;
     private readonly theme: Theme;
     private readonly hasTheme: boolean;
@@ -247,6 +250,9 @@ export class File {
         // Build commentsIds.xml when comments carry a durableId
         if (this.comments.CommentIdsData) {
             this.commentsIds = new CommentsIds(this.comments.CommentIdsData);
+        }
+        if (options.people?.length) {
+            this.people = new People(options.people);
         }
         this.fileRelationships = new Relationships();
         this.customProperties = new CustomProperties(options.customProperties ?? []);
@@ -549,6 +555,16 @@ export class File {
             );
             this.contentTypes.addCommentsIds();
         }
+
+        if (this.people) {
+            this.documentWrapper.Relationships.addRelationship(
+                // eslint-disable-next-line functional/immutable-data
+                this.currentRelationshipId++,
+                "http://schemas.microsoft.com/office/2011/relationships/people",
+                "people.xml",
+            );
+            this.contentTypes.addPeople();
+        }
     }
 
     public get Document(): DocumentWrapper {
@@ -619,6 +635,11 @@ export class File {
     /** Durable comment id part. Undefined when no comment carries a durableId. */
     public get CommentsIds(): CommentsIds | undefined {
         return this.commentsIds;
+    }
+
+    /** The people part. Undefined when the document names no people. */
+    public get People(): People | undefined {
+        return this.people;
     }
 
     public get FontTable(): FontWrapper {
