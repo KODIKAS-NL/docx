@@ -33,6 +33,17 @@ describe("DeletedRuns", () => {
             .and.not.include('"w:instrText"');
     });
 
+    it("leaves the text of a text box in a deleted run as it is: its paragraphs are not deleted", () => {
+        const text = new BuilderElement({ name: "w:t", children: ["Box text" as never] });
+        const content = new BuilderElement({
+            name: "w:txbxContent",
+            children: [new BuilderElement({ name: "w:p", children: [new BuilderElement({ name: "w:r", children: [text] })] })],
+        });
+        const xml = JSON.stringify(tree([new TextRun({ children: [content as never] }), new TextRun("gone")]));
+        expect(xml).to.include('"w:txbxContent":[{"w:p":[{"w:r":[{"w:t"');
+        expect(xml).to.include('"w:delText"');
+    });
+
     it("leaves out the date when there is none", () => {
         const xml = new Formatter().format(new DeletedRuns({ id: 1, author: "Ann", children: [] }));
         expect(xml).to.deep.equal({ "w:del": { _attr: { "w:id": 1, "w:author": "Ann" } } });

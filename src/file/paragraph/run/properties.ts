@@ -275,6 +275,10 @@ export type IRunPropertiesChangeOptions = {} & IRunPropertiesOptions & IChangedA
 export type IParagraphRunPropertiesOptions = {
     readonly insertion?: IChangedAttributesProperties;
     readonly deletion?: IChangedAttributesProperties;
+    /** The mark moved away (part of a named move, `w:moveFrom`). */
+    readonly moveFrom?: IChangedAttributesProperties;
+    /** The mark moved here (part of a named move, `w:moveTo`). */
+    readonly moveTo?: IChangedAttributesProperties;
 } & IRunPropertiesOptions;
 
 /**
@@ -488,13 +492,22 @@ export class ParagraphRunProperties extends RunProperties {
     public constructor(options?: IParagraphRunPropertiesOptions) {
         super(options);
 
-        if (options?.insertion) {
-            this.push(new InsertionTrackChange(options.insertion));
-        }
+        // the mark's tracked changes come first (EG_ParaRPrTrackChanges: ins, del, moveFrom, moveTo), before its formatting
+        const changes: readonly XmlComponent[] = [
+            ...(options?.insertion ? [new InsertionTrackChange(options.insertion)] : []),
+            ...(options?.deletion ? [new DeletionTrackChange(options.deletion)] : []),
+            ...(options?.moveFrom ? [new MoveTrackChange("w:moveFrom", options.moveFrom)] : []),
+            ...(options?.moveTo ? [new MoveTrackChange("w:moveTo", options.moveTo)] : []),
+        ];
+        changes.forEach((change, index) => this.root.splice(index, 0, change));
+    }
+}
 
-        if (options?.deletion) {
-            this.push(new DeletionTrackChange(options.deletion));
-        }
+/** A paragraph mark's part in a move (`w:moveFrom` or `w:moveTo`, CT_TrackChange). */
+class MoveTrackChange extends XmlComponent {
+    public constructor(name: "w:moveFrom" | "w:moveTo", options: IChangedAttributesProperties) {
+        super(name);
+        this.root.push(new ChangeAttributes({ id: options.id, author: options.author, date: options.date }));
     }
 }
 

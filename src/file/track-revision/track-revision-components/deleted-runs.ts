@@ -11,7 +11,10 @@ import { ChangeAttributes, type IChangedAttributesProperties } from "../track-re
 
 const DELETED_NAMES: Readonly<Record<string, string>> = { "w:t": "w:delText", "w:instrText": "w:delInstrText" };
 
-/** The XML with its text as deleted text, at any depth: a text box in a deleted run has its text deleted with it. */
+/** Content of its own in a run: a text box's paragraphs, which a deletion of the run does not delete (Word marks the shape alone). */
+const OWN_CONTENT: ReadonlySet<string> = new Set(["w:txbxContent"]);
+
+/** The XML with its text as deleted text, at any depth, but not a text box's own paragraphs: Word takes `w:delText` there for a corrupt file. */
 const asDeleted = (xml: unknown): unknown => {
     if (Array.isArray(xml)) {
         return xml.map(asDeleted);
@@ -20,7 +23,10 @@ const asDeleted = (xml: unknown): unknown => {
         return xml;
     }
     return Object.fromEntries(
-        Object.entries(xml).map(([name, value]) => [DELETED_NAMES[name] ?? name, name === "_attr" ? value : asDeleted(value)]),
+        Object.entries(xml).map(([name, value]) => [
+            DELETED_NAMES[name] ?? name,
+            name === "_attr" || OWN_CONTENT.has(name) ? value : asDeleted(value),
+        ]),
     );
 };
 

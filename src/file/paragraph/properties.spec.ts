@@ -292,6 +292,31 @@ describe("ParagraphProperties", () => {
             });
         });
 
+        it("should write a moved mark's moveFrom and moveTo before the mark's formatting", () => {
+            const change = { id: 1, author: "Firstname Lastname", date: "123" };
+            const attr = { _attr: { "w:author": "Firstname Lastname", "w:date": "123", "w:id": 1 } };
+            const from = new Formatter().format(new ParagraphProperties({ run: { bold: true, moveFrom: change } }));
+            expect(from).to.deep.equal({ "w:pPr": [{ "w:rPr": [{ "w:moveFrom": attr }, { "w:b": {} }, { "w:bCs": {} }] }] });
+            const to = new Formatter().format(new ParagraphProperties({ run: { moveTo: change } }));
+            expect(to).to.deep.equal({ "w:pPr": [{ "w:rPr": [{ "w:moveTo": attr }] }] });
+        });
+
+        it("should write a mark's insertion before its formatting", () => {
+            const change = { id: 1, author: "Firstname Lastname", date: "123" };
+            const tree = new Formatter().format(new ParagraphProperties({ run: { italics: true, insertion: change } }));
+            expect(tree).to.deep.equal({
+                "w:pPr": [
+                    {
+                        "w:rPr": [
+                            { "w:ins": { _attr: { "w:author": "Firstname Lastname", "w:date": "123", "w:id": 1 } } },
+                            { "w:i": {} },
+                            { "w:iCs": {} },
+                        ],
+                    },
+                ],
+            });
+        });
+
         it("should create with the run property deletion", () => {
             const properties = new ParagraphProperties({
                 run: {
