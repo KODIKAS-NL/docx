@@ -10,6 +10,7 @@ export { SchemeColor } from "./inline/graphic/graphic-data/pic/shape-properties/
 // The option types of drawings, and what docx/shapes uses to write the shapes inside them
 export type { DocPropertiesOptions } from "./doc-properties/doc-properties";
 export {
+    type DrawingExtension,
     type DrawingLinkOptions,
     NonVisualDrawingProperties,
     type NonVisualDrawingPropertiesOptions,

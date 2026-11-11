@@ -119,4 +119,42 @@ describe("DocProperties links and decorative drawings", () => {
         );
         expect(tree["wp:docPr"][1]["a:hlinkClick"]._attr["r:id"]).to.not.equal("rIdouter");
     });
+
+    it("should write an application's own extensions in the extension list, after the decorative mark", () => {
+        const tree = new Formatter().format(
+            new DocProperties(
+                {
+                    name: "Logo",
+                    id: "1",
+                    extensions: [
+                        {
+                            uri: "{00000000-0000-0000-0000-000000000001}",
+                            name: "x:mark",
+                            namespace: "urn:example:mark",
+                            attributes: { id: "42" },
+                        },
+                    ],
+                },
+                { decorative: true },
+            ),
+            createContext(),
+        );
+        const list = tree["wp:docPr"][1]["a:extLst"];
+        expect(list[0]).to.deep.equal({ _attr: { "xmlns:a": "http://schemas.openxmlformats.org/drawingml/2006/main" } });
+        expect(list[1]["a:ext"][0]._attr.uri).to.equal("{C183D7F6-B498-43B3-948B-1728B52AA6E4}");
+        expect(list[2]).to.deep.equal({
+            "a:ext": [
+                { _attr: { uri: "{00000000-0000-0000-0000-000000000001}" } },
+                { "x:mark": { _attr: { "xmlns:x": "urn:example:mark", id: "42" } } },
+            ],
+        });
+    });
+
+    it("should write the extension list for extensions alone, and none without", () => {
+        const extensions = [{ uri: "{00000000-0000-0000-0000-000000000002}", name: "mark", namespace: "urn:example:mark" }];
+        const tree = new Formatter().format(new DocProperties({ name: "Logo", id: "1", extensions }), createContext());
+        expect(tree["wp:docPr"][1]["a:extLst"][1]["a:ext"][1]).to.deep.equal({ mark: { _attr: { xmlns: "urn:example:mark" } } });
+        const plain = new Formatter().format(new DocProperties({ name: "Logo", id: "1" }), createContext());
+        expect(plain["wp:docPr"]).to.not.be.an("array");
+    });
 });

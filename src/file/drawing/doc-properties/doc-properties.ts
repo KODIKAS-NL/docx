@@ -12,7 +12,7 @@ import { ConcreteHyperlink } from "@file/paragraph";
 import { type IContext, type IXmlableObject, NextAttributeComponent, XmlComponent } from "@file/xml-components";
 import { docPropertiesUniqueNumericId } from "@util/convenience-functions";
 
-import { DrawingLink, type DrawingLinkOptions, createDecorativeExtensionList } from "./non-visual-drawing-properties";
+import { type DrawingExtension, DrawingLink, type DrawingLinkOptions, createExtensionList } from "./non-visual-drawing-properties";
 
 // <complexType name="CT_NonVisualDrawingProps">
 //     <sequence>
@@ -39,6 +39,8 @@ export type DocPropertiesOptions = {
     readonly id?: string;
     /** The name of the picture itself, written in `pic:cNvPr`, next to the drawing's. Default is an empty name */
     readonly pictureName?: string;
+    /** Extensions of an application's own in the drawing's extension list, such as a mark that names where the picture came from */
+    readonly extensions?: readonly DrawingExtension[];
 };
 
 /**
@@ -67,10 +69,11 @@ export type DocPropertiesOptions = {
 export class DocProperties extends XmlComponent {
     private readonly link?: DrawingLink;
     private readonly decorative?: boolean;
+    private readonly extensions: readonly DrawingExtension[];
 
     public constructor(
         // The name is required in the XML, so a drawing without one is given an empty name
-        { name = "", description, title, id }: DocPropertiesOptions = {},
+        { name = "", description, title, id, extensions = [] }: DocPropertiesOptions = {},
         { link, decorative }: DrawingLinkOptions = {},
     ) {
         super("wp:docPr");
@@ -104,6 +107,7 @@ export class DocProperties extends XmlComponent {
         this.root.push(new NextAttributeComponent(attributes));
         this.link = link === undefined ? undefined : new DrawingLink(link);
         this.decorative = decorative;
+        this.extensions = extensions;
     }
 
     public prepForXml(context: IContext): IXmlableObject | undefined {
@@ -124,8 +128,8 @@ export class DocProperties extends XmlComponent {
         }
 
         // The extension list comes after the link in the schema
-        if (this.decorative) {
-            this.root.push(createDecorativeExtensionList(true));
+        if (this.decorative || this.extensions.length > 0) {
+            this.root.push(createExtensionList(true, this.extensions, this.decorative));
         }
 
         const result = super.prepForXml(context);

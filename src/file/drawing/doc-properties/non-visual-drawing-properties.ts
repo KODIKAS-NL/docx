@@ -43,7 +43,64 @@ const DECORATIVE_EXTENSION_URI = "{C183D7F6-B498-43B3-948B-1728B52AA6E4}";
  *
  * @param declareNamespace - Declares the DrawingML namespace, for elements outside `a:graphic` such as `wp:docPr`
  */
-export const createDecorativeExtensionList = (declareNamespace: boolean): XmlComponent =>
+export const createDecorativeExtensionList = (declareNamespace: boolean): XmlComponent => createExtensionList(declareNamespace, [], true);
+
+const createDecorativeExtension = (): XmlComponent =>
+    new BuilderElement<{ readonly uri: string }>({
+        name: "a:ext",
+        attributes: { uri: { key: "uri", value: DECORATIVE_EXTENSION_URI } },
+        children: [
+            new BuilderElement<{ readonly namespace: string; readonly value: number }>({
+                name: "adec:decorative",
+                attributes: {
+                    namespace: { key: "xmlns:adec", value: "http://schemas.microsoft.com/office/drawing/2017/decorative" },
+                    value: { key: "val", value: 1 },
+                },
+            }),
+        ],
+    });
+
+/**
+ * An extension of an application's own in a drawing's extension list: an `a:ext` with its `uri` (a GUID that names the extension) and
+ * one element in the application's namespace. Word keeps extensions it doesn't know when it saves a document.
+ *
+ * ```xml
+ * <a:ext uri="{00000000-0000-0000-0000-000000000000}">
+ *   <x:mark xmlns:x="urn:example:mark" id="42"/>
+ * </a:ext>
+ * ```
+ */
+export type DrawingExtension = {
+    /** The extension's GUID, in braces */
+    readonly uri: string;
+    /** The element's qualified name, with its prefix, such as `x:mark` */
+    readonly name: string;
+    /** The namespace the element's prefix stands for */
+    readonly namespace: string;
+    /** The element's attributes, by name */
+    readonly attributes?: Readonly<Record<string, string>>;
+};
+
+const createExtension = ({ uri, name, namespace, attributes = {} }: DrawingExtension): XmlComponent => {
+    const prefix = name.includes(":") ? name.slice(0, name.indexOf(":")) : undefined;
+    const declared =
+        prefix === undefined
+            ? { namespace: { key: "xmlns", value: namespace } }
+            : { namespace: { key: `xmlns:${prefix}`, value: namespace } };
+    const own = Object.fromEntries(Object.entries(attributes).map(([key, value]) => [key, { key, value }]));
+    return new BuilderElement<{ readonly uri: string }>({
+        name: "a:ext",
+        attributes: { uri: { key: "uri", value: uri } },
+        children: [new BuilderElement<Record<string, string>>({ name, attributes: { ...declared, ...own } })],
+    });
+};
+
+/**
+ * Creates a drawing's extension list (`a:extLst`) with extensions of an application's own, after the decorative mark when there is one.
+ *
+ * @param declareNamespace - Declares the DrawingML namespace, for elements outside `a:graphic` such as `wp:docPr`
+ */
+export const createExtensionList = (declareNamespace: boolean, extensions: readonly DrawingExtension[], decorative = false): XmlComponent =>
     new BuilderElement<{ readonly namespace?: string }>({
         name: "a:extLst",
         attributes: {
@@ -52,21 +109,7 @@ export const createDecorativeExtensionList = (declareNamespace: boolean): XmlCom
                 value: declareNamespace ? "http://schemas.openxmlformats.org/drawingml/2006/main" : undefined,
             },
         },
-        children: [
-            new BuilderElement<{ readonly uri: string }>({
-                name: "a:ext",
-                attributes: { uri: { key: "uri", value: DECORATIVE_EXTENSION_URI } },
-                children: [
-                    new BuilderElement<{ readonly namespace: string; readonly value: number }>({
-                        name: "adec:decorative",
-                        attributes: {
-                            namespace: { key: "xmlns:adec", value: "http://schemas.microsoft.com/office/drawing/2017/decorative" },
-                            value: { key: "val", value: 1 },
-                        },
-                    }),
-                ],
-            }),
-        ],
+        children: [...(decorative ? [createDecorativeExtension()] : []), ...extensions.map(createExtension)],
     });
 
 /**
