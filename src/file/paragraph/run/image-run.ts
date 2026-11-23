@@ -13,8 +13,6 @@ import { ChangeAttributes, type IChangedAttributesProperties } from "@file/track
 import { BuilderElement, type IContext, type IXmlableObject, XmlComponent } from "@file/xml-components";
 import { hashedId } from "@util/convenience-functions";
 
-import { type RegularImageOptions, type SvgMediaOptions, imageTypeOf, standardizeData } from "./image-data";
-import { type IRunPropertiesOptions, RunProperties } from "./properties";
 import { Drawing, type IFloating } from "../../drawing";
 import type { EffectExtentAttributes } from "../../drawing/effect-extent/effect-extent";
 import type { LuminanceOptions } from "../../drawing/inline/graphic/graphic-data/pic/blip/blip";
@@ -23,6 +21,8 @@ import type { OutlineOptions } from "../../drawing/inline/graphic/graphic-data/p
 import type { SolidFillOptions } from "../../drawing/inline/graphic/graphic-data/pic/shape-properties/outline/solid-fill";
 import type { IMediaTransformation } from "../../media";
 import type { IMediaData } from "../../media/data";
+import { type RegularImageOptions, type SvgMediaOptions, imageTypeOf, standardizeData } from "./image-data";
+import { type IRunPropertiesOptions, RunProperties } from "./properties";
 
 /**
  * Core options for image configuration.

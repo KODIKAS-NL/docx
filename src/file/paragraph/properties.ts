@@ -71,6 +71,28 @@ export type ILevelParagraphStylePropertiesOptions = {
     readonly outlineLevel?: number;
     /** How the characters of a line of different sizes align (`w:textAlignment`). */
     readonly textAlignment?: "auto" | "baseline" | "bottom" | "center" | "top";
+    /**
+     * Whether Word may add a small space between East Asian text and the Latin letters beside it (`w:autoSpaceDE`).
+     * `autoSpaceEastAsianText` is the same for numbers.
+     *
+     * This element specifies whether inter-character spacing shall automatically be adjusted between regions of Latin text and regions of East Asian text in the current paragraph. These regions shall be determined by the Unicode character values of the text content within the paragraph.
+     *
+     * It is on unless the paragraph, or the formatting it takes from elsewhere such as its style or the document
+     * defaults, turns it off. Where it is on, whether the space appears depends on the Word that opens the document.
+     * Set it to `false` to turn the space off in every Word.
+     */
+    readonly autoSpaceLatinAndEastAsianText?: boolean;
+    /**
+     * Whether Word may add a small space between East Asian text and the numbers beside it (`w:autoSpaceDN`).
+     * `autoSpaceLatinAndEastAsianText` is the same for Latin letters.
+     *
+     * This element specifies whether inter-character spacing shall automatically be adjusted between regions of numbers and regions of East Asian text in the current paragraph. These regions shall be determined by the Unicode character values of the text content within the paragraph.
+     *
+     * It is on unless the paragraph, or the formatting it takes from elsewhere such as its style or the document
+     * defaults, turns it off. Where it is on, whether the space appears depends on the Word that opens the document.
+     * Set it to `false` to turn the space off in every Word.
+     */
+    readonly autoSpaceEastAsianText?: boolean;
 };
 
 /**
@@ -153,16 +175,6 @@ export type IParagraphPropertiesOptionsBase = {
     readonly overflowPunctuation?: boolean;
     /** Character scaling percentage (e.g., 200 for 200%) */
     readonly scale?: number;
-    /**
-     * This element specifies whether inter-character spacing shall automatically be adjusted between regions of numbers and regions of East Asian text in the current paragraph. These regions shall be determined by the Unicode character values of the text content within the paragraph.
-     * This only works in Microsoft Word. It is not part of the ECMA-376 OOXML standard.
-     */
-    readonly autoSpaceEastAsianText?: boolean;
-    /**
-     * Whether inter-character spacing is adjusted between regions of Latin text and regions of East Asian text (`w:autoSpaceDE`).
-     * Reference: ECMA-376 § 17.3.1.2.
-     */
-    readonly autoSpaceLatinText?: boolean;
     /**
      * Whether the East Asian line breaking rules (kinsoku) apply to the paragraph (`w:kinsoku`).
      * Reference: ECMA-376 § 17.3.1.16.
@@ -438,6 +450,10 @@ export class ParagraphProperties extends IgnoreIfEmptyXmlComponent {
             this.push(new NumberProperties(0, 0));
         }
 
+        if (options.suppressLineNumbers !== undefined) {
+            this.push(new OnOffElement("w:suppressLineNumbers", options.suppressLineNumbers));
+        }
+
         if (options.border) {
             this.push(new Border(options.border));
         }
@@ -479,8 +495,8 @@ export class ParagraphProperties extends IgnoreIfEmptyXmlComponent {
             this.push(new OnOffElement("w:overflowPunct", options.overflowPunctuation));
         }
 
-        if (options.autoSpaceLatinText !== undefined) {
-            this.push(new OnOffElement("w:autoSpaceDE", options.autoSpaceLatinText));
+        if (options.autoSpaceLatinAndEastAsianText !== undefined) {
+            this.push(new OnOffElement("w:autoSpaceDE", options.autoSpaceLatinAndEastAsianText));
         }
 
         if (options.autoSpaceEastAsianText !== undefined) {
@@ -513,10 +529,6 @@ export class ParagraphProperties extends IgnoreIfEmptyXmlComponent {
 
         if (options.outlineLevel !== undefined) {
             this.push(createOutlineLevel(options.outlineLevel));
-        }
-
-        if (options.suppressLineNumbers !== undefined) {
-            this.push(new OnOffElement("w:suppressLineNumbers", options.suppressLineNumbers));
         }
 
         if (options.run) {

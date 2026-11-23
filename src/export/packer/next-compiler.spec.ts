@@ -9,8 +9,8 @@ import { BuilderElement } from "@file/xml-components";
 import * as convenienceFunctions from "@util/convenience-functions";
 import { zipFiles } from "@util/zip";
 
-import { Compiler } from "./next-compiler";
 import { textOf, unzip } from "../../tests/zip";
+import { Compiler } from "./next-compiler";
 
 describe("Compiler", () => {
     it("should leave out the notes parts a document doesn't use, with omitUnusedNotes", () => {

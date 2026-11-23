@@ -21,6 +21,7 @@ import {
     createTransformation,
 } from "docx";
 
+import type { TextStyles } from "../text-layout";
 import { GROUP_URI, createShapeDrawingChild } from "./drawing/shape-drawing-child";
 import { createShapeGroup } from "./drawing/shape-group";
 import { createStyledDrawing } from "./drawing/styled-drawing";
@@ -36,7 +37,6 @@ import {
 } from "./shape-drawing";
 import type { ShapeLayout } from "./shape-layout";
 import { createDrawingProperties } from "./shape-run-data";
-import type { TextStyles } from "../text-layout";
 
 export type { IShapeGroupChildOptions, IShapeNestedGroupOptions, IShapePictureOptions, ShapeChildSpace } from "./shape-drawing";
 export type { ShapeFlowLayout, ShapeGridLayout, ShapeLane, ShapeLayout, ShapeLayoutDirection, ShapeTreeLayout } from "./shape-layout";
